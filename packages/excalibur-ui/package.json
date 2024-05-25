@@ -35,16 +35,26 @@
   "scripts": {
     "dev": "(vite build --watch & tsc -w)",
     "build": "vite build && tsc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "vitest"
   },
   "devDependencies": {
+    "expect-dom": "file:../expect-dom",
+    "@adobe/css-tools": "^4.3.3",
     "@types/node": "^20.12.12",
+    "@vitest/browser": "^1.6.0",
+    "aria-query": "^5.3.0",
     "excalibur": "^0.29.3",
+    "jsdom": "^24.0.0",
+    "playwright": "^1.44.1",
+    "redent": "^4.0.0",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vite-plugin-solid": "^2.10.2",
+    "vitest": "^1.6.0"
   },
   "dependencies": {
-    "solid-js": "^1.8.17"
+    "solid-js": ">=1.8"
   },
   "peerDependencies": {
     "excalibur": ">=0.29",

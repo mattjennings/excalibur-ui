@@ -1,8 +1,8 @@
-import { createElement } from '.'
+import { createExElement } from '.'
 import { UIElement, UIElementProps } from '../ui-element'
 import { Rectangle, Color } from 'excalibur'
 
-export default createElement({
+export default createExElement({
   init() {
     return new RectangleElement()
   },

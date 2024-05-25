@@ -1,4 +1,4 @@
-import { createElement } from '.'
+import { createExElement } from '.'
 import { UIElement, UIElementProps } from '../ui-element'
 import {
   Color,
@@ -10,7 +10,7 @@ import {
   Font,
 } from 'excalibur'
 
-export default createElement({
+export default createExElement({
   init() {
     return new TextElement()
   },

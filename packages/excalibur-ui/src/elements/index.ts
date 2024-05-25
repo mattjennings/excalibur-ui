@@ -19,19 +19,19 @@ export interface ElementDefinition<
   ) => void
 }
 
-export function createElement<
+export function createExElement<
   Instance extends Entity,
   Props extends Record<string, any>,
 >(args: ElementDefinition<Instance, Props>) {
   return args
 }
 
-export function registerElement<
+export function registerExElement<
   Instance extends Entity,
   Props extends Record<string, any>,
 >(name: string, definition: ElementDefinition<Instance, Props>) {
-  elements[name] = createElement(definition)
+  elements[name] = createExElement(definition)
 }
 
-export { RectangleProps, RectangleElement } from './rectangle'
-export { TextProps, TextElement } from './text'
+export { type RectangleProps, RectangleElement } from './rectangle'
+export { type TextProps, TextElement } from './text'
