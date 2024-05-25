@@ -49,7 +49,7 @@ class RectangleElement extends UIElement {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      rectangle: RectangleProps
+      'ex-rectangle': RectangleProps
     }
   }
 }

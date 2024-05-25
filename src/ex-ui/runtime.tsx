@@ -1,6 +1,15 @@
 import { createSignal } from 'solid-js'
 import { createRenderer } from 'solid-js/universal'
 import { elements } from './elements'
+import { Resolution, UIContainer } from './ui-container'
+import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
+
+type ExElement = ex.Entity & {
+  __exui?: { type: string; htmlRootElement?: HTMLElement }
+}
+type NodeType = ExElement | HTMLElement | Text
+
+const HTML_PROPERTIES = new Set(['className', 'textContent'])
 
 const {
   render,
@@ -15,59 +24,150 @@ const {
   setProp,
   mergeProps,
   use,
-} = createRenderer<ex.Entity & { __exui?: { type: string } }>({
+} = createRenderer<NodeType>({
   createElement(string) {
-    if (elements[string]) {
-      const el = elements[string].init()
-      el.__exui = { type: string }
+    // excalibur element
+    if (string.startsWith('ex-')) {
+      if (elements[string]) {
+        const el = elements[string].init()
+        el.__exui = { type: string }
 
-      return el
+        return el
+      } else {
+        throw new Error('Unknown element ' + string)
+      }
     }
 
-    throw new Error('Unknown element ' + string)
+    // html element
+    return document.createElement(string)
   },
+  // only html elements can have text nodes
   createTextNode(value) {
-    return new ex.Label({ text: value })
+    return document.createTextNode(value)
   },
   replaceText(textNode, value) {
-    if (textNode instanceof ex.Label) {
-      textNode.text = value
+    if (isTextNode(textNode)) {
+      textNode.data = value
+    } else if (isExElement(textNode)) {
+      throw new Error('Excalibur elements may not have text content')
+    } else {
+      throw new Error('Cannot replace text on non-text node')
     }
   },
   setProperty(node, name, value) {
-    if (node.__exui) {
-      const definition = elements[node.__exui.type]
+    if (isExElement(node)) {
+      const definition = node.__exui && elements[node.__exui.type]
 
-      if (definition.applyProp) {
+      if (definition?.applyProp) {
         definition.applyProp(node, name, value)
         return
       }
     }
+
+    if (isHtmlElement(node)) {
+      if (name === 'style') Object.assign(node.style, value)
+      // @ts-ignore
+      else if (name.startsWith('on')) node[name.toLowerCase()] = value
+      // @ts-ignore
+      else if (HTML_PROPERTIES.has(name)) node[name] = value
+      // @ts-ignore
+      else node.setAttribute(name, value)
+    }
   },
   insertNode(parent, node, anchor) {
-    parent.addChild(node)
+    // adding html element
+    if (isHtmlElement(node) || isTextNode(node)) {
+      // parent is ui container
+      if (isUIContainer(parent)) {
+        parent.htmlRootElement.insertBefore(node, anchor as Node)
+      }
+      // parent is html element
+      else if (isHtmlElement(parent)) {
+        parent.insertBefore(node, anchor as Node)
+      } else {
+        // unsupported
+        if (isExElement(parent)) {
+          throw new Error('Cannot insert html element into excalibur element')
+        } else {
+          throw new Error('Unknown parent type')
+        }
+      }
+    }
+    // adding excalibur element
+    else if (isExElement(node)) {
+      // parent is ui container or ex element
+      if (isExElement(parent)) {
+        parent.addChild(node)
+      } else {
+        // unsupported
+        if (isHtmlElement(parent)) {
+          throw new Error('Cannot insert excalibur element into html element')
+        } else {
+          throw new Error('Unknown parent type')
+        }
+      }
+    }
   },
   isTextNode(node) {
-    return node instanceof ex.Label
+    return isTextNode(node)
   },
   removeNode(parent, node) {
-    parent.removeChild(node)
+    if (isHtmlElement(node) || isTextNode(node)) {
+      if (isHtmlElement(parent)) {
+        parent.removeChild(node)
+      } else if (isUIContainer(parent)) {
+        parent.htmlRootElement.removeChild(node)
+      } else {
+        throw new Error('Unknown parent type')
+      }
+    } else if (isExElement(node)) {
+      if (isExElement(parent)) {
+        parent.removeChild(node)
+      } else {
+        throw new Error('Unknown parent type')
+      }
+    }
   },
   getParentNode(node) {
-    if (!node.parent) throw new Error('No parent for node ' + node)
-    return node.parent
+    if (isExElement(node)) {
+      if (!node.parent) {
+        throw new Error('No parent for node ' + node)
+      }
+      return node.parent as ExElement
+    }
+
+    if (isHtmlElement(node)) {
+      if (!node.parentNode) {
+        throw new Error('No parent for node ' + node)
+      }
+
+      return node.parentNode as HTMLElement
+    }
+
+    throw new Error('Unknown node type')
   },
   getFirstChild(node) {
-    return node.children[0]
+    if (isHtmlElement(node)) return node.firstChild as HTMLElement
+    if (isExElement(node)) return node.children[0] as ExElement
+
+    throw new Error('Unknown node type')
   },
   getNextSibling(node) {
-    const parent = node.parent
+    if (isHtmlElement(node)) {
+      return node.nextSibling as HTMLElement
+    }
 
-    if (!parent) throw new Error('No parent for node ' + node)
+    if (isExElement(node)) {
+      const parent = node.parent
 
-    const index = parent.children.indexOf(node)
+      if (!parent) throw new Error('No parent for node ' + node)
 
-    return parent.children[index + 1]
+      const index = parent.children.indexOf(node)
+
+      return parent.children[index + 1] as ExElement
+    }
+
+    throw new Error('Unknown node type')
   },
 })
 
@@ -76,10 +176,17 @@ const {
  * once i.e during intialization of scene or entity.
  */
 function renderUI<T extends ex.Scene | ex.Entity>(
-  ui: () => ex.Entity<any>,
   sceneOrEntity: T,
+  ui: () => NodeType,
+  options?: {
+    html?: {
+      resolution?: Resolution
+      tag?: string
+      id?: string
+    }
+  },
 ) {
-  let container: ex.Entity<any>
+  let container: UIContainer
 
   const [didRender, setDidRender] = createSignal(false)
 
@@ -94,7 +201,7 @@ function renderUI<T extends ex.Scene | ex.Entity>(
 
   if (isScene(sceneOrEntity)) {
     scene.on('activate', () => {
-      container = new ex.ScreenElement()
+      container = new UIContainer(options?.html)
       scene.add(container)
     })
 
@@ -104,7 +211,7 @@ function renderUI<T extends ex.Scene | ex.Entity>(
     })
   } else if (isEntity(sceneOrEntity)) {
     const setup = () => {
-      container = new ex.ScreenElement()
+      container = new UIContainer(options?.html)
       scene.add(container)
     }
 
@@ -129,6 +236,22 @@ function isEntity(node: ex.Entity | ex.Scene): node is ex.Entity {
 
 function isScene(node: ex.Entity | ex.Scene): node is ex.Scene {
   return node instanceof ex.Scene
+}
+
+function isExElement(node: NodeType): node is ExElement {
+  return node instanceof ex.Entity
+}
+
+function isHtmlElement(node: NodeType): node is HTMLElement {
+  return node instanceof HTMLElement
+}
+
+function isTextNode(node: NodeType): node is Text {
+  return node instanceof Text
+}
+
+function isUIContainer(node: unknown): node is UIContainer {
+  return node instanceof UIContainer
 }
 
 export {
@@ -156,3 +279,9 @@ export {
   Index,
   ErrorBoundary,
 } from 'solid-js'
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends JSXSolid.IntrinsicElements {}
+  }
+}

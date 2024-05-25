@@ -25,14 +25,6 @@ export default defineConfig({
         moduleName: 'ex-ui',
         generate: 'universal',
       },
-      babel: {
-        plugins: [
-          [
-            '@babel/plugin-syntax-decorators',
-            { decoratorsBeforeExport: false },
-          ],
-        ],
-      },
     }),
   ],
 })

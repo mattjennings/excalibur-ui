@@ -7,7 +7,7 @@ export default class Level1 extends ex.Scene {
 
   onInitialize() {
     this.add(new Player())
-    // renderUI(() => {
+    // renderUI(this, () => {
     //   const pos = useValue(() => this.pos)
     //   return (
     //     <>
@@ -24,7 +24,7 @@ export default class Level1 extends ex.Scene {
     //       </text>
     //     </>
     //   )
-    // }, this)
+    // })
   }
 
   onPreUpdate(engine: Engine<any>, delta: number): void {
@@ -56,24 +56,34 @@ class Player extends ex.Actor {
       this.pos.x += Math.sin(elapsed / 1000)
     })
 
-    renderUI(() => this.drawLabel(), this)
-  }
+    renderUI(this, () => {
+      const pos = useValue(() => this.pos)
 
-  drawLabel() {
-    const pos = useValue(() => this.pos)
-
-    return (
-      <text
-        text="Player"
-        anchor={ex.Vector.Half}
-        x={pos().x}
-        y={pos().y - 60}
-        color="#ffffff"
-        font={{
-          size: 25,
-          family: 'Arial',
-        }}
-      />
-    )
+      return (
+        <>
+          <button
+            style={{
+              position: 'absolute',
+              top: `${pos().y}px`,
+              left: `${pos().x}px`,
+            }}
+          >
+            sadf
+          </button>
+          <ex-rectangle width={1} height={1} color="#ff0000" />
+          <ex-text
+            text="Player"
+            anchor={ex.Vector.Half}
+            x={pos().x}
+            y={pos().y - 60}
+            color="#ffffff"
+            font={{
+              size: 25,
+              family: 'Arial',
+            }}
+          />
+        </>
+      )
+    })
   }
 }

@@ -73,7 +73,7 @@ class TextElement extends UIElement {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      text: TextProps
+      'ex-text': TextProps
     }
   }
 }

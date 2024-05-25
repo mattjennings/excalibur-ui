@@ -2,8 +2,8 @@ import text from './text'
 import rectangle from './rectangle'
 
 export const elements: Record<string, ElementDefinition<any, any>> = {
-  text,
-  rectangle,
+  'ex-text': text,
+  'ex-rectangle': rectangle,
 }
 
 interface ElementDefinition<

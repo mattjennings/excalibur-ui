@@ -27,6 +27,15 @@ export class UIElement extends ex.Entity {
     this.addComponent(this.graphics)
   }
 
+  kill() {
+    this.onPreKill?.()
+    super.kill()
+    this.onPostKill?.()
+  }
+
+  onPreKill() {}
+  onPostKill() {}
+
   get width() {
     return this.graphics.current?.width ?? 0
   }
