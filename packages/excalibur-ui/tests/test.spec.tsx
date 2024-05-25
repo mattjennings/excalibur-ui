@@ -1,7 +1,6 @@
 import { test, expect, beforeEach } from '$fixture'
 import * as ex from 'excalibur'
 import { renderUI } from 'excalibur-ui'
-import { waitFor } from '$test-utils/wait'
 
 beforeEach(async ({ useScene, clock }) => {
   await useScene(
@@ -12,11 +11,9 @@ beforeEach(async ({ useScene, clock }) => {
     },
   )
 
-  await clock.step(16)
+  clock.step(16)
 })
 
-test('can move right', async ({}) => {
-  expect(
-    document.body.querySelector('[data-testid="hello"]'),
-  ).toBeInTheDocument()
+test('renders html', async ({}) => {
+  expect(document.body).toHaveTextContent('hello')
 })
