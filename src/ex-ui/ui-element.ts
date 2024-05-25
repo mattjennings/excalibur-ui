@@ -266,6 +266,10 @@ export class UIElement extends ex.Entity {
     this._htmlPropsSignal[1](this.htmlProps())
   }
 
+  toCssPx(value: number) {
+    return `calc(${value} * var(--px))`
+  }
+
   htmlProps() {
     if (!this.scene) return {}
 
@@ -275,10 +279,10 @@ export class UIElement extends ex.Entity {
       style: {
         // visibility: 'hidden',
         position: 'absolute',
-        left: `calc(${screenPos.x - this.width * this.anchor.x} * var(--px))`,
-        top: `calc(${screenPos.y - this.height * this.anchor.y} * var(--px))`,
-        width: `calc(${this.width} * var(--px))`,
-        height: `calc(${this.height} * var(--px))`,
+        left: this.toCssPx(screenPos.x - this.width * this.anchor.x),
+        top: this.toCssPx(screenPos.y - this.height * this.anchor.y),
+        width: this.toCssPx(this.width),
+        height: this.toCssPx(this.height),
       },
     }
   }
