@@ -1,5 +1,3 @@
-import { UIElement } from './ui-element'
-
 /**
  * When 'native' the UI will be sized to the actual "css" pixels of the canvas.
  * In other words, it will be a higher resolution for devices that support it.
@@ -11,13 +9,16 @@ import { UIElement } from './ui-element'
  */
 export type Resolution = 'native' | 'scaled'
 
-export class UIContainer extends UIElement {
+export class UIContainer extends ex.Entity {
   htmlRootElement: HTMLElement
   engine!: ex.Engine
   resolution: Resolution
   resizeObserver: ResizeObserver | null = null
 
   parentElement!: HTMLElement
+
+  transform: ex.TransformComponent
+  graphics: ex.GraphicsComponent
 
   constructor({
     tag = 'div',
@@ -34,6 +35,7 @@ export class UIContainer extends UIElement {
     this.resolution = resolution
     this.htmlRootElement = document.createElement(tag)
     this.htmlRootElement.style.position = 'absolute'
+    this.htmlRootElement.style.pointerEvents = 'none'
 
     if (id) {
       this.htmlRootElement.id = id
@@ -41,6 +43,12 @@ export class UIContainer extends UIElement {
 
     this.parentElement = parent
     this.parentElement.appendChild(this.htmlRootElement)
+
+    this.transform = new ex.TransformComponent()
+    this.graphics = new ex.GraphicsComponent()
+    this.graphics.anchor = ex.Vector.Zero
+    this.addComponent(this.transform)
+    this.addComponent(this.graphics)
 
     this.resizeObserver = new ResizeObserver(() => {
       this.resizeToCanvas()

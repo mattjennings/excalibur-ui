@@ -1,5 +1,6 @@
-import { renderUI, useValue } from 'ex-ui'
+import { renderUI, useEngineEvent, useValue } from 'ex-ui'
 import { Engine } from 'excalibur'
+import { createSignal } from 'solid-js'
 
 export default class Level1 extends ex.Scene {
   time = 0
@@ -53,24 +54,29 @@ class Player extends ex.Actor {
     let elapsed = 0
     this.on('preupdate', ({ delta }) => {
       elapsed += delta
-      this.pos.x += Math.sin(elapsed / 1000)
+      // this.pos.x += Math.sin(elapsed / 1000)
+      // this.scene!.camera.pos.x += 5 / delta
     })
 
     renderUI(this, () => {
       const pos = useValue(() => this.pos)
+      const screenPos = useValue(() =>
+        this.scene!.engine.worldToScreenCoordinates(this.pos),
+      )
 
       return (
         <>
           <button
             style={{
               position: 'absolute',
-              top: `${pos().y}px`,
-              left: `${pos().x}px`,
+              top: `${screenPos().y}px`,
+              left: `${screenPos().x}px`,
             }}
           >
-            sadf
+            asdf
           </button>
-          <ex-rectangle width={1} height={1} color="#ff0000" />
+          <ex-rectangle color="#ff0000" width={100} height={100} />
+
           <ex-text
             text="Player"
             anchor={ex.Vector.Half}
@@ -78,7 +84,7 @@ class Player extends ex.Actor {
             y={pos().y - 60}
             color="#ffffff"
             font={{
-              size: 25,
+              size: 20,
               family: 'Arial',
             }}
           />

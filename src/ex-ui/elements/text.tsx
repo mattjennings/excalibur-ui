@@ -21,6 +21,8 @@ export interface TextProps extends UIElementProps {
     | ex.Font
     | ex.SpriteFont
     | (ex.FontOptions & ex.GraphicOptions & ex.RasterOptions)
+  width?: never
+  height?: never
 }
 
 class TextElement extends UIElement {

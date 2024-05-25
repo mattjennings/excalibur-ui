@@ -9,32 +9,81 @@ export interface UIElementProps {
   opacity?: number
   scale?: ex.Vector
   rotation?: number
+  pointer?: {
+    useGraphicsBounds?: boolean
+    useColliderShape?: boolean
+  }
+
+  draggable?: boolean
+
+  onPreUpdate?: (ev: ex.PreUpdateEvent) => void
+  onPostUpdate?: (ev: ex.PostUpdateEvent) => void
+  onKill?: (ev: ex.KillEvent) => void
+  onPreKill?: (ev: ex.PreKillEvent) => void
+  onPostKill?: (ev: ex.PostKillEvent) => void
+  onPreDraw?: (ev: ex.PreDrawEvent) => void
+  onPostDraw?: (ev: ex.PostDrawEvent) => void
+  onPreTransformDraw?: (ev: ex.PreTransformDrawEvent) => void
+  onPostTransformDraw?: (ev: ex.PostTransformDrawEvent) => void
+  onPreDebugDraw?: (ev: ex.PreDebugDrawEvent) => void
+  onPostDebugDraw?: (ev: ex.PostDebugDrawEvent) => void
+  onPointerUp?: (ev: ex.PointerEvent) => void
+  onPointerDown?: (ev: ex.PointerEvent) => void
+  onPointerEnter?: (ev: ex.PointerEvent) => void
+  onPointerLeave?: (ev: ex.PointerEvent) => void
+  onPointerMove?: (ev: ex.PointerEvent) => void
+  onPointerCancel?: (ev: ex.PointerEvent) => void
+  onWheel?: (ev: ex.WheelEvent) => void
+  onPointerDrag?: (ev: ex.PointerEvent) => void
+  onPointerDragEnd?: (ev: ex.PointerEvent) => void
+  onPointerDragEnter?: (ev: ex.PointerEvent) => void
+  onPointerDragLeave?: (ev: ex.PointerEvent) => void
+  onPointerDragMove?: (ev: ex.PointerEvent) => void
 }
 
 /**
  * Base class for all UI elements.
  */
 export class UIElement extends ex.Entity {
-  transform: ex.TransformComponent
-  graphics: ex.GraphicsComponent
+  _transform!: ex.TransformComponent
+  _graphics!: ex.GraphicsComponent
+  _pointer!: ex.PointerComponent
+
+  declare events: ex.EventEmitter
 
   constructor() {
     super()
-    this.transform = new ex.TransformComponent()
-    this.graphics = new ex.GraphicsComponent()
+    this._transform = new ex.TransformComponent()
+    this._graphics = new ex.GraphicsComponent()
+    this._pointer = new ex.PointerComponent()
     this.graphics.anchor = ex.Vector.Zero
     this.addComponent(this.transform)
     this.addComponent(this.graphics)
+    this.addComponent(this._pointer)
   }
 
   kill() {
+    this.events.emit('prekill')
     this.onPreKill?.()
     super.kill()
+    this.events.emit('postkill')
     this.onPostKill?.()
   }
 
   onPreKill() {}
   onPostKill() {}
+
+  get transform() {
+    return this._transform
+  }
+
+  get graphics() {
+    return this._graphics
+  }
+
+  get pointer(): ex.PointerComponent {
+    return this._pointer
+  }
 
   get width() {
     return this.graphics.current?.width ?? 0
@@ -43,6 +92,7 @@ export class UIElement extends ex.Entity {
   set width(value: number) {
     if (!this.graphics.current) return
     this.graphics.current.width = value
+    this.pointer.localBounds = new ex.BoundingBox(0, 0, value, this.height)
   }
 
   get height() {
@@ -52,6 +102,7 @@ export class UIElement extends ex.Entity {
   set height(value: number) {
     if (!this.graphics.current) return
     this.graphics.current.height = value
+    this.pointer.localBounds = new ex.BoundingBox(0, 0, this.width, value)
   }
 
   get anchor() {
@@ -118,4 +169,84 @@ export class UIElement extends ex.Entity {
   set rotation(value: number) {
     this.transform.rotation = value
   }
+
+  set pointer(value: UIElementProps['pointer']) {
+    const pointer = this.get(ex.PointerComponent)
+    pointer.useGraphicsBounds =
+      value?.useGraphicsBounds ?? pointer.useGraphicsBounds
+    pointer.useColliderShape =
+      value?.useColliderShape ?? pointer.useColliderShape
+  }
+
+  /**
+   * Draggable helper
+   */
+  private _draggable: boolean = false
+  private _dragging: boolean = false
+
+  private _pointerDragStartHandler = () => {
+    this._dragging = true
+  }
+
+  private _pointerDragEndHandler = () => {
+    this._dragging = false
+  }
+
+  private _pointerDragMoveHandler = (pe: ex.PointerEvent) => {
+    if (this._dragging) {
+      this.pos = pe.worldPos
+    }
+  }
+
+  private _pointerDragLeaveHandler = (pe: ex.PointerEvent) => {
+    if (this._dragging) {
+      this.pos = pe.worldPos
+    }
+  }
+
+  public get draggable(): boolean {
+    return this._draggable
+  }
+
+  public set draggable(isDraggable: boolean) {
+    if (isDraggable) {
+      if (isDraggable && !this._draggable) {
+        this.events.on('pointerdragstart', this._pointerDragStartHandler)
+        this.events.on('pointerdragend', this._pointerDragEndHandler)
+        this.events.on('pointerdragmove', this._pointerDragMoveHandler)
+        this.events.on('pointerdragleave', this._pointerDragLeaveHandler)
+      } else if (!isDraggable && this._draggable) {
+        this.events.off('pointerdragstart', this._pointerDragStartHandler)
+        this.events.off('pointerdragend', this._pointerDragEndHandler)
+        this.events.off('pointerdragmove', this._pointerDragMoveHandler)
+        this.events.off('pointerdragleave', this._pointerDragLeaveHandler)
+      }
+
+      this._draggable = isDraggable
+    }
+  }
+}
+
+export type UIElementEvents = ex.EntityEvents & {
+  kill: ex.KillEvent
+  prekill: ex.PreKillEvent
+  postkill: ex.PostKillEvent
+  predraw: ex.PreDrawEvent
+  postdraw: ex.PostDrawEvent
+  pretransformdraw: ex.PreDrawEvent
+  posttransformdraw: ex.PostDrawEvent
+  predebugdraw: ex.PreDebugDrawEvent
+  postdebugdraw: ex.PostDebugDrawEvent
+  pointerup: ex.PointerEvent
+  pointerdown: ex.PointerEvent
+  pointerenter: ex.PointerEvent
+  pointerleave: ex.PointerEvent
+  pointermove: ex.PointerEvent
+  pointercancel: ex.PointerEvent
+  pointerwheel: ex.WheelEvent
+  pointerdragstart: ex.PointerEvent
+  pointerdragend: ex.PointerEvent
+  pointerdragenter: ex.PointerEvent
+  pointerdragleave: ex.PointerEvent
+  pointerdragmove: ex.PointerEvent
 }

@@ -30,3 +30,32 @@ export function useValue<T>(
 
   return signal
 }
+
+export function useEngine() {
+  return ex.Engine.useEngine()
+}
+
+export function useEngineEvent<TEventName extends ex.EventKey<ex.EngineEvents>>(
+  event: TEventName,
+  listener: ex.Handler<ex.EngineEvents[TEventName]>,
+) {
+  const engine = ex.Engine.useEngine()
+
+  engine.on(event, listener)
+
+  onCleanup(() => {
+    engine.off(event, listener)
+  })
+}
+
+export function useSceneEvent<TEventName extends ex.EventKey<ex.SceneEvents>>(
+  scene: ex.Scene,
+  event: TEventName,
+  listener: ex.Handler<ex.SceneEvents[TEventName]>,
+) {
+  scene.on(event, listener)
+
+  onCleanup(() => {
+    scene.off(event, listener)
+  })
+}

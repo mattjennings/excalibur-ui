@@ -1,11 +1,11 @@
-import { createSignal } from 'solid-js'
+import { createSignal, onCleanup } from 'solid-js'
 import { createRenderer } from 'solid-js/universal'
 import { elements } from './elements'
 import { Resolution, UIContainer } from './ui-container'
 import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
 
 type ExElement = ex.Entity & {
-  __exui?: { type: string; htmlRootElement?: HTMLElement }
+  __exui?: { type: string }
 }
 type NodeType = ExElement | HTMLElement | Text
 
@@ -39,7 +39,10 @@ const {
     }
 
     // html element
-    return document.createElement(string)
+    const el = document.createElement(string)
+    // overlay has pointer events disabled so that it doesn't block excalibur pointer events
+    el.style.pointerEvents = 'auto'
+    return el
   },
   // only html elements can have text nodes
   createTextNode(value) {
@@ -58,6 +61,21 @@ const {
     if (isExElement(node)) {
       const definition = node.__exui && elements[node.__exui.type]
 
+      if (name.startsWith('on')) {
+        const event = name.slice(2).toLowerCase()
+        const listener = value as EventListener
+
+        if ('on' in node) {
+          // @ts-ignore
+          node.on(event, listener)
+
+          onCleanup(() => {
+            debugger
+            // @ts-ignore
+            node.off(event, listener)
+          })
+        }
+      }
       if (definition?.applyProp) {
         definition.applyProp(node, name, value)
         return
@@ -122,6 +140,7 @@ const {
       }
     } else if (isExElement(node)) {
       if (isExElement(parent)) {
+        node.kill()
         parent.removeChild(node)
       } else {
         throw new Error('Unknown parent type')
