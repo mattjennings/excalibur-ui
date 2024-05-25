@@ -2,6 +2,7 @@ import { Accessor, createSignal } from 'solid-js'
 import { UIContainer } from './ui-container'
 
 export interface UIElementProps {
+  ref?: (el: UIElement) => void
   pos?: ex.Vector
   x?: number
   y?: number
