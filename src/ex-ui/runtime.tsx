@@ -97,7 +97,7 @@ const {
     if (isHtmlElement(node) || isTextNode(node)) {
       // parent is ui container
       if (isUIContainer(parent)) {
-        parent.htmlRootElement.insertBefore(node, anchor as Node)
+        parent.htmlElement.insertBefore(node, anchor as Node)
       }
       // parent is html element
       else if (isHtmlElement(parent)) {
@@ -134,7 +134,7 @@ const {
       if (isHtmlElement(parent)) {
         parent.removeChild(node)
       } else if (isUIContainer(parent)) {
-        parent.htmlRootElement.removeChild(node)
+        parent.htmlElement.removeChild(node)
       } else {
         throw new Error('Unknown parent type')
       }

@@ -54,7 +54,7 @@ class Player extends ex.Actor {
     let elapsed = 0
     this.on('preupdate', ({ delta }) => {
       elapsed += delta
-      // this.pos.x += Math.sin(elapsed / 1000)
+      this.pos.x += Math.sin(elapsed / 1000)
       // this.scene!.camera.pos.x += 5 / delta
     })
 
@@ -66,18 +66,46 @@ class Player extends ex.Actor {
 
       return (
         <>
-          <button
-            style={{
-              position: 'absolute',
-              top: `${screenPos().y}px`,
-              left: `${screenPos().x}px`,
-            }}
+          <ex-rectangle
+            html={(props) => (
+              <button
+                style={{
+                  ...props().style,
+                  background: 'none',
+                  border: 'none',
+                  pointer: 'cursor',
+                }}
+              ></button>
+            )}
+            x={pos().x}
+            y={100}
+            color="#ff4400"
+            width={140}
+            height={80}
           >
-            asdf
-          </button>
-          <ex-rectangle color="#ff0000" width={100} height={100} />
+            <ex-text
+              text="I'm a button"
+              x={10}
+              y={25}
+              color="#ffffff"
+              font={{
+                size: 20,
+              }}
+            />
+          </ex-rectangle>
 
           <ex-text
+            html={(props) => (
+              <span
+                aria-label="Player"
+                style={{
+                  ...props().style,
+                  visibility: 'hidden',
+                }}
+              >
+                Player
+              </span>
+            )}
             text="Player"
             anchor={ex.Vector.Half}
             x={pos().x}

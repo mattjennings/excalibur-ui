@@ -1,3 +1,6 @@
+import { Accessor, createSignal } from 'solid-js'
+import { UIContainer } from './ui-container'
+
 export interface UIElementProps {
   pos?: ex.Vector
   x?: number
@@ -13,6 +16,7 @@ export interface UIElementProps {
     useGraphicsBounds?: boolean
     useColliderShape?: boolean
   }
+  html?: (props: Accessor<Record<string, any>>) => HTMLElement
 
   draggable?: boolean
 
@@ -51,6 +55,8 @@ export class UIElement extends ex.Entity {
 
   declare events: ex.EventEmitter
 
+  uiContainer?: UIContainer
+
   constructor() {
     super()
     this._transform = new ex.TransformComponent()
@@ -60,6 +66,23 @@ export class UIElement extends ex.Entity {
     this.addComponent(this.transform)
     this.addComponent(this.graphics)
     this.addComponent(this._pointer)
+
+    this.on('predraw', () => {
+      if (this.isInitialized) {
+        this._updateHtml()
+      }
+    })
+
+    this.on('initialize', () => {
+      let parent = this.parent
+      while (parent) {
+        if (parent instanceof UIContainer) {
+          this.uiContainer = parent
+          break
+        }
+        parent = parent.parent
+      }
+    })
   }
 
   kill() {
@@ -223,6 +246,40 @@ export class UIElement extends ex.Entity {
       }
 
       this._draggable = isDraggable
+    }
+  }
+
+  private _htmlElement: HTMLElement | null = null
+  private _htmlPropsSignal = createSignal({})
+
+  set html(node: (props: any) => HTMLElement) {
+    this._htmlElement = node(this._htmlPropsSignal[0])
+  }
+
+  private _updateHtml() {
+    if (!this.uiContainer) return
+
+    if (this._htmlElement && !this._htmlElement?.parentNode) {
+      this.uiContainer.htmlElement.appendChild(this._htmlElement)
+    }
+
+    this._htmlPropsSignal[1](this.htmlProps())
+  }
+
+  htmlProps() {
+    if (!this.scene) return {}
+
+    const screenPos = this.scene.engine.worldToScreenCoordinates(this.pos)
+
+    return {
+      style: {
+        // visibility: 'hidden',
+        position: 'absolute',
+        left: `calc(${screenPos.x - this.width * this.anchor.x} * var(--px))`,
+        top: `calc(${screenPos.y - this.height * this.anchor.y} * var(--px))`,
+        width: `calc(${this.width} * var(--px))`,
+        height: `calc(${this.height} * var(--px))`,
+      },
     }
   }
 }

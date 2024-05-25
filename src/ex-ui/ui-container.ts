@@ -10,7 +10,7 @@
 export type Resolution = 'native' | 'scaled'
 
 export class UIContainer extends ex.Entity {
-  htmlRootElement: HTMLElement
+  htmlElement: HTMLElement
   engine!: ex.Engine
   resolution: Resolution
   resizeObserver: ResizeObserver | null = null
@@ -33,16 +33,16 @@ export class UIContainer extends ex.Entity {
   } = {}) {
     super()
     this.resolution = resolution
-    this.htmlRootElement = document.createElement(tag)
-    this.htmlRootElement.style.position = 'absolute'
-    this.htmlRootElement.style.pointerEvents = 'none'
+    this.htmlElement = document.createElement(tag)
+    this.htmlElement.style.position = 'absolute'
+    this.htmlElement.style.pointerEvents = 'none'
 
     if (id) {
-      this.htmlRootElement.id = id
+      this.htmlElement.id = id
     }
 
     this.parentElement = parent
-    this.parentElement.appendChild(this.htmlRootElement)
+    this.parentElement.appendChild(this.htmlElement)
 
     this.transform = new ex.TransformComponent()
     this.graphics = new ex.GraphicsComponent()
@@ -56,8 +56,8 @@ export class UIContainer extends ex.Entity {
     this.resizeObserver.observe(document.body)
 
     this.onPreUpdate = () => {
-      if (this.htmlRootElement) {
-        this.htmlRootElement.style.opacity = this.graphics.opacity.toString()
+      if (this.htmlElement) {
+        this.htmlElement.style.opacity = this.graphics.opacity.toString()
       }
     }
   }
@@ -66,48 +66,49 @@ export class UIContainer extends ex.Entity {
     this.engine = engine
     this.resizeToCanvas()
     this.engine.currentScene.on('activate', () => {
-      if (!this.htmlRootElement.parentElement) {
-        this.parentElement.appendChild(this.htmlRootElement)
+      if (!this.htmlElement.parentElement) {
+        this.parentElement.appendChild(this.htmlElement)
       }
     })
 
     this.engine.currentScene.on('deactivate', () => {
-      this.htmlRootElement.parentElement?.removeChild(this.htmlRootElement)
+      this.htmlElement.parentElement?.removeChild(this.htmlElement)
     })
   }
 
   resizeToCanvas = () => {
-    if (this.htmlRootElement && this.engine?.canvas) {
+    if (this.htmlElement && this.engine?.canvas) {
       const { width, height, left, top, bottom, right } =
         this.engine.canvas.getBoundingClientRect()
 
       const scaledWidth = width / this.engine.drawWidth
       const scaledHeight = height / this.engine.drawHeight
 
-      this.htmlRootElement.style.top = `${top}px`
-      this.htmlRootElement.style.left = `${left}px`
-      this.htmlRootElement.style.bottom = `${bottom}px`
-      this.htmlRootElement.style.right = `${right}px`
-      this.htmlRootElement.style.overflow = 'hidden'
+      this.htmlElement.style.top = `${top}px`
+      this.htmlElement.style.left = `${left}px`
+      this.htmlElement.style.bottom = `${bottom}px`
+      this.htmlElement.style.right = `${right}px`
+      this.htmlElement.style.overflow = 'hidden'
 
       if (this.resolution === 'scaled') {
-        this.htmlRootElement.style.width = `${this.engine.drawWidth}px`
-        this.htmlRootElement.style.height = `${this.engine.drawHeight}px`
-        this.htmlRootElement.style.transform = `scale(${scaledWidth}, ${scaledHeight})`
-        this.htmlRootElement.style.transformOrigin = '0 0'
+        this.htmlElement.style.width = `${this.engine.drawWidth}px`
+        this.htmlElement.style.height = `${this.engine.drawHeight}px`
+        this.htmlElement.style.transform = `scale(${scaledWidth}, ${scaledHeight})`
+        this.htmlElement.style.transformOrigin = '0 0'
+        this.htmlElement.style.setProperty('--px', `1px`)
       } else {
-        this.htmlRootElement.style.width = `${width}px`
-        this.htmlRootElement.style.height = `${height}px`
-        this.htmlRootElement.style.fontSize = `${
+        this.htmlElement.style.width = `${width}px`
+        this.htmlElement.style.height = `${height}px`
+        this.htmlElement.style.fontSize = `${
           scaledWidth > scaledHeight ? scaledWidth : scaledHeight
         }px`
-        this.htmlRootElement.style.setProperty('--px', `${scaledWidth}px`)
+        this.htmlElement.style.setProperty('--px', `${scaledWidth}px`)
       }
     }
   }
 
   onPreKill() {
-    this.htmlRootElement.remove()
+    this.htmlElement.remove()
     this.resizeObserver?.disconnect()
   }
 }
