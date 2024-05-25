@@ -250,7 +250,17 @@ export class UIElement extends ex.Entity {
   }
 
   private _htmlElement: HTMLElement | null = null
-  private _htmlPropsSignal = createSignal({})
+  private _htmlPropsSignal = createSignal(
+    {},
+    {
+      // terrible idea, but probably still faster than
+      // updating DOM element every frame
+      // best solution would be to update style attributes narrowly with signals
+      equals(prev, next) {
+        return JSON.stringify(prev) === JSON.stringify(next)
+      },
+    },
+  )
 
   set html(node: (props: any) => HTMLElement) {
     this._htmlElement = node(this._htmlPropsSignal[0])

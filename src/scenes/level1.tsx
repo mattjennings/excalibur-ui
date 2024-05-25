@@ -75,6 +75,7 @@ class Player extends ex.Actor {
                   border: 'none',
                   pointer: 'cursor',
                 }}
+                onClick={() => alert('clicked')}
               ></button>
             )}
             x={pos().x}
@@ -95,17 +96,6 @@ class Player extends ex.Actor {
           </ex-rectangle>
 
           <ex-text
-            html={(props) => (
-              <span
-                aria-label="Player"
-                style={{
-                  ...props().style,
-                  visibility: 'hidden',
-                }}
-              >
-                Player
-              </span>
-            )}
             text="Player"
             anchor={ex.Vector.Half}
             x={pos().x}
