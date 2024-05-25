@@ -4,8 +4,8 @@ import solidPlugin from 'vite-plugin-solid'
 
 export default defineConfig({
   optimizeDeps: {
-    // only necessary if running local build of ex-ui. if installed from npm, remove this
-    exclude: ['ex-ui'],
+    // only necessary if running local build of excalibur-ui. if installed from npm, remove this
+    exclude: ['excalibur-ui'],
   },
   plugins: [
     // automatically expose global 'ex' variable that will compile into
@@ -20,7 +20,7 @@ export default defineConfig({
     }),
     solidPlugin({
       solid: {
-        moduleName: 'ex-ui',
+        moduleName: 'excalibur-ui',
         generate: 'universal',
       },
     }),

@@ -1,0 +1,53 @@
+{
+  "name": "excalibur-ui",
+  "version": "0.0.0-1",
+  "type": "module",
+  "author": "mattjennings",
+  "description": "A UI library for Excalibur.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mattjennings/excalibur-ui",
+    "directory": "packages/excalibur-ui"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattjennings/excalibur-ui/issues"
+  },
+  "homepage": "https://github.com/mattjennings/excalibur-ui",
+  "keywords": [
+    "excalibur",
+    "ui",
+    "solid",
+    "jsx"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/excalibur-ui.umd.cjs",
+  "module": "./dist/excalibur-ui.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/excalibur-ui.js",
+      "require": "./dist/excalibur-ui.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "(vite build --watch & tsc -w)",
+    "build": "vite build && tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "excalibur": "^0.29.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  },
+  "dependencies": {
+    "solid-js": "^1.8.17"
+  },
+  "peerDependencies": {
+    "excalibur": ">=0.29",
+    "solid-js": ">=1.8"
+  }
+}

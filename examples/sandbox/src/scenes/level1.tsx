@@ -1,4 +1,4 @@
-import { renderUI, useValue } from 'ex-ui'
+import { renderUI, useValue } from 'excalibur-ui'
 import { Engine } from 'excalibur'
 
 export default class Level1 extends ex.Scene {

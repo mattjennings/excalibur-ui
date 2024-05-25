@@ -1,4 +1,4 @@
-# ex-ui
+# excalibur-ui
 
 ⚠️ very much a work in progress ⚠️
 
@@ -6,12 +6,12 @@ Render UI in Excalibur.js games using JSX with SolidJS. It is recommended to be 
 
 ## Installation
 
-ex-ui requires either Babel or Vite to compile the JSX.
+excalibur-ui requires either Babel or Vite to compile the JSX.
 
 ### Babel
 
 ```bash
-npm install ex-ui solid-js babel-preset-solid
+npm install excalibur-ui solid-js babel-preset-solid
 ```
 
 Update your `.babelrc` file:
@@ -22,7 +22,7 @@ Update your `.babelrc` file:
     [
       "babel-preset-solid",
       {
-        "moduleName": "ex-ui",
+        "moduleName": "excalibur-ui",
         "generate": "universal"
       }
     ]
@@ -33,7 +33,7 @@ Update your `.babelrc` file:
 ### Vite
 
 ```bash
-npm install ex-ui solid-js vite-plugin-solid
+npm install excalibur-ui solid-js vite-plugin-solid
 ```
 
 Update your vite config file:
@@ -46,7 +46,7 @@ export default defineConfig({
   plugins: [
     solidPlugin({
       solid: {
-        moduleName: 'ex-ui',
+        moduleName: 'excalibur-ui',
         generate: 'universal',
       },
     }),
@@ -59,7 +59,7 @@ export default defineConfig({
 UI can be rendered either on a Scene or Entity, and should be called once during `onInitialize`.
 
 ```tsx
-import { renderUI } from 'ex-ui'
+import { renderUI } from 'excalibur-ui'
 
 class Scene extends ex.Scene {
   onInitialize() {
@@ -100,13 +100,13 @@ class Actor extends ex.Actor {
 
 ## Using state
 
-Since ex-ui is build on top of Solid, you can use signals and effects the same way you would in Solid components.
+Since excalibur-ui is build on top of Solid, you can use signals and effects the same way you would in Solid components.
 
-You may want to manage state at the entity/scene level using class properties, so ex-ui provides a `useValue` hook that
+You may want to manage state at the entity/scene level using class properties, so excalibur-ui provides a `useValue` hook that
 will provide a signal that is updated every frame. You can use this to get values from the parent entity/scene.
 
 ```tsx
-import { useValue } from 'ex-ui'
+import { useValue } from 'excalibur-ui'
 
 class Actor extends ex.Actor {
   onInitialize() {
@@ -136,7 +136,7 @@ class Actor extends ex.Actor {
 All HTML elements are supported and render on top of the game canvas.
 
 ```tsx
-import { useValue } from 'ex-ui'
+import { useValue } from 'excalibur-ui'
 
 class Actor extends ex.Actor {
   onInitialize() {

@@ -6,8 +6,8 @@ export default defineConfig({
     emptyOutDir: false,
     lib: {
       entry: resolve(__dirname, 'src/index.tsx'),
-      name: 'ex-ui',
-      fileName: 'ex-ui',
+      name: 'excalibur-ui',
+      fileName: 'excalibur-ui',
     },
     rollupOptions: {
       external: ['excalibur'],
