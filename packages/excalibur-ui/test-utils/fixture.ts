@@ -2,6 +2,7 @@ import '$test-utils/vitest-setup'
 import { test as base } from 'vitest'
 import { WebAudio } from 'excalibur'
 import * as ex from 'excalibur'
+import { renderUI } from '../src/runtime'
 
 // @ts-ignore - suppress audio warning
 WebAudio._UNLOCKED = true
@@ -17,8 +18,9 @@ export const test = base.extend<{
   loader: ex.Loader
   clock: ex.TestClock
 
-  useScene: (scene: typeof ex.Scene) => Promise<ex.Scene>
+  useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
   dispatchKeyEvent: (type: string, key: string) => void
+  renderUI: (ui: () => any) => void
 }>({
   game: async ({ loader }, use) => {
     // only make the game once
@@ -63,8 +65,8 @@ export const test = base.extend<{
     const loader = new ex.Loader(resources)
     await use(loader)
   },
-  useScene: async ({ game }, use) => {
-    await use(async (scene: typeof ex.Scene) => {
+  useNewScene: async ({ game }, use) => {
+    await use(async (scene = ex.Scene) => {
       game.add('test', new scene())
 
       await game.goToScene('test')
@@ -87,6 +89,12 @@ export const test = base.extend<{
   clock: async ({}, use) => {
     await use(clock)
   },
+  renderUI: async ({ scene, clock }, use) => {
+    await use((ui) => {
+      renderUI(scene, ui)
+      clock.step(1000)
+    })
+  },
 })
 
 export {
@@ -104,7 +112,8 @@ declare module 'vitest' {
     scene: ex.Scene
     loader: ex.Loader
     clock: ex.TestClock
-    useScene: (scene: typeof ex.Scene) => Promise<ex.Scene>
+    useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
     dispatchKeyEvent: (type: string, key: string) => void
+    renderUI: (ui: () => any) => void
   }
 }

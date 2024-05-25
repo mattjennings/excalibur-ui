@@ -214,27 +214,35 @@ function renderUI<T extends Scene | Entity>(
 
   scene.on('predraw', () => {
     if (!didRender()) {
-      setDidRender(true)
-      render(ui, container)
+      if (container) {
+        setDidRender(true)
+        render(ui, container)
+      }
     }
   })
 
+  const setup = () => {
+    container = new UIContainer(options?.html)
+    scene.add(container)
+  }
+
   if (isScene(sceneOrEntity)) {
-    scene.on('activate', () => {
-      container = new UIContainer(options?.html)
-      scene.add(container)
-    })
+    const isCurrentScene = sceneOrEntity === sceneOrEntity.engine.currentScene
+    if (isCurrentScene && scene.isInitialized) {
+      setup()
+    } else {
+      scene.on('activate', () => {
+        setup()
+      })
+    }
 
     scene.on('deactivate', () => {
-      container.kill()
+      if (container) {
+        container.kill()
+      }
       setDidRender(false)
     })
   } else if (isEntity(sceneOrEntity)) {
-    const setup = () => {
-      container = new UIContainer(options?.html)
-      scene.add(container)
-    }
-
     if (sceneOrEntity.isInitialized) {
       setup()
     } else {
@@ -244,7 +252,9 @@ function renderUI<T extends Scene | Entity>(
     }
 
     sceneOrEntity.on('kill', () => {
-      container.kill()
+      if (container) {
+        container.kill()
+      }
       setDidRender(false)
     })
   }

@@ -5,7 +5,6 @@ interface CustomMatchers<R = unknown> {
   toBeEmptyDOMElement: () => R
   toBeEmpty: () => R
   toBeInTheDocument: () => R
-  toBeInTheDOM: () => R
   toBeInvalid: () => R
   toBePartiallyChecked: () => R
   toBeRequired: () => R
@@ -23,7 +22,7 @@ interface CustomMatchers<R = unknown> {
   toHaveFocus: () => R
   toHaveFormValues: () => R
   toHaveRole: () => R
-  toHaveStyle: () => R
+  toHaveStyle: (styles: Record<string, any>) => R
   toHaveTextContent: (text: string) => R
   toHaveValue: () => R
 }
