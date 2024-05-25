@@ -66,6 +66,7 @@ class Player extends ex.Actor {
 
       return (
         <>
+          <button>i'm a normal button</button>
           <ex-rectangle
             html={(props) => (
               <button
