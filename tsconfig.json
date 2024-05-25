@@ -19,6 +19,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "preserve",
+    "experimentalDecorators": true,
 
     "types": ["vite-plugin-excalibur-resources/types"],
     "baseUrl": ".",

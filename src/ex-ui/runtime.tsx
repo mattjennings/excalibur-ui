@@ -3,7 +3,7 @@ import { createRenderer } from 'solid-js/universal'
 import { elements } from './elements'
 
 const {
-  render: _render,
+  render,
   effect,
   memo,
   createComponent,
@@ -71,42 +71,68 @@ const {
   },
 })
 
-function render<Scene extends ex.Scene>(
-  UI: (props: RecordOf<Scene>) => ex.Entity<any>,
-  scene: Scene,
+/**
+ * Renders a Solid JSX UI into an Excalibur scene or entity. Only call this
+ * once i.e during intialization of scene or entity.
+ */
+function renderUI<T extends ex.Scene | ex.Entity>(
+  ui: () => ex.Entity<any>,
+  sceneOrEntity: T,
 ) {
   let container: ex.Entity<any>
 
   const [didRender, setDidRender] = createSignal(false)
-  const [props, setProps] = createSignal<any>()
+
+  const scene = isScene(sceneOrEntity) ? sceneOrEntity : sceneOrEntity.scene!
 
   scene.on('predraw', () => {
-    // @ts-ignore
-    setProps({ ...scene })
-
     if (!didRender()) {
       setDidRender(true)
-      _render(() => <UI {...props()} />, container)
+      render(ui, container)
     }
   })
 
-  scene.on('activate', () => {
-    container = new ex.ScreenElement()
-    scene.add(container)
-  })
+  if (isScene(sceneOrEntity)) {
+    scene.on('activate', () => {
+      container = new ex.ScreenElement()
+      scene.add(container)
+    })
 
-  scene.on('deactivate', () => {
-    container.kill()
-    setDidRender(false)
-  })
+    scene.on('deactivate', () => {
+      container.kill()
+      setDidRender(false)
+    })
+  } else if (isEntity(sceneOrEntity)) {
+    const setup = () => {
+      container = new ex.ScreenElement()
+      scene.add(container)
+    }
+
+    if (sceneOrEntity.isInitialized) {
+      setup()
+    } else {
+      sceneOrEntity.on('initialize', () => {
+        setup()
+      })
+    }
+
+    sceneOrEntity.on('kill', () => {
+      container.kill()
+      setDidRender(false)
+    })
+  }
 }
 
-type RecordOf<T> = {
-  [K in keyof T]: T[K]
+function isEntity(node: ex.Entity | ex.Scene): node is ex.Entity {
+  return node instanceof ex.Entity
+}
+
+function isScene(node: ex.Entity | ex.Scene): node is ex.Scene {
+  return node instanceof ex.Scene
 }
 
 export {
-  render,
+  renderUI,
   effect,
   memo,
   createComponent,

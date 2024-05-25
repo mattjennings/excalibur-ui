@@ -1,4 +1,4 @@
-import { render } from 'ex-ui'
+import { renderUI, useValue } from 'ex-ui'
 import { Engine } from 'excalibur'
 
 export default class Level1 extends ex.Scene {
@@ -6,23 +6,25 @@ export default class Level1 extends ex.Scene {
   pos = ex.vec(0, 0)
 
   onInitialize() {
-    render((props) => {
-      return (
-        <>
-          <text
-            text="Hello World!"
-            pos={props.pos}
-            color="#ffffff"
-            font={{
-              size: 50,
-              family: 'Arial',
-            }}
-          >
-            <rectangle width={200} height={200} color="#ff0000" z={-1} />
-          </text>
-        </>
-      )
-    }, this)
+    this.add(new Player())
+    // renderUI(() => {
+    //   const pos = useValue(() => this.pos)
+    //   return (
+    //     <>
+    //       <text
+    //         text="Hello World!"
+    //         pos={pos()}
+    //         color="#ffffff"
+    //         font={{
+    //           size: 50,
+    //           family: 'Arial',
+    //         }}
+    //       >
+    //         <rectangle width={200} height={200} color="#ff0000" z={-1} />
+    //       </text>
+    //     </>
+    //   )
+    // }, this)
   }
 
   onPreUpdate(engine: Engine<any>, delta: number): void {
@@ -32,6 +34,46 @@ export default class Level1 extends ex.Scene {
     this.pos = ex.vec(
       300 + Math.cos(this.time) * 100,
       300 + Math.sin(this.time) * 100,
+    )
+  }
+}
+
+class Player extends ex.Actor {
+  constructor() {
+    super({
+      x: 300,
+      y: 300,
+      width: 20,
+      height: 20,
+      color: ex.Color.Blue,
+    })
+  }
+
+  onInitialize() {
+    let elapsed = 0
+    this.on('preupdate', ({ delta }) => {
+      elapsed += delta
+      this.pos.x += Math.sin(elapsed / 1000)
+    })
+
+    renderUI(() => this.drawLabel(), this)
+  }
+
+  drawLabel() {
+    const pos = useValue(() => this.pos)
+
+    return (
+      <text
+        text="Player"
+        anchor={ex.Vector.Half}
+        x={pos().x}
+        y={pos().y - 60}
+        color="#ffffff"
+        font={{
+          size: 25,
+          family: 'Arial',
+        }}
+      />
     )
   }
 }
