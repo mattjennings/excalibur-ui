@@ -1,17 +1,39 @@
 import { Accessor, createSignal } from 'solid-js'
 import { UIContainer } from './ui-container'
+import {
+  Vector,
+  PreUpdateEvent,
+  PostUpdateEvent,
+  KillEvent,
+  PreKillEvent,
+  PostKillEvent,
+  PreDrawEvent,
+  PostDrawEvent,
+  PreTransformDrawEvent,
+  PostTransformDrawEvent,
+  PreDebugDrawEvent,
+  PostDebugDrawEvent,
+  Entity,
+  TransformComponent,
+  GraphicsComponent,
+  PointerComponent,
+  EventEmitter,
+  BoundingBox,
+  EntityEvents,
+  PointerEvent,
+} from 'excalibur'
 
 export interface UIElementProps {
   ref?: (el: UIElement) => void
-  pos?: ex.Vector
+  pos?: Vector
   x?: number
   y?: number
   z?: number
   width?: number
   height?: number
-  anchor?: ex.Vector
+  anchor?: Vector
   opacity?: number
-  scale?: ex.Vector
+  scale?: Vector
   rotation?: number
   pointer?: {
     useGraphicsBounds?: boolean
@@ -21,49 +43,49 @@ export interface UIElementProps {
 
   draggable?: boolean
 
-  onPreUpdate?: (ev: ex.PreUpdateEvent) => void
-  onPostUpdate?: (ev: ex.PostUpdateEvent) => void
-  onKill?: (ev: ex.KillEvent) => void
-  onPreKill?: (ev: ex.PreKillEvent) => void
-  onPostKill?: (ev: ex.PostKillEvent) => void
-  onPreDraw?: (ev: ex.PreDrawEvent) => void
-  onPostDraw?: (ev: ex.PostDrawEvent) => void
-  onPreTransformDraw?: (ev: ex.PreTransformDrawEvent) => void
-  onPostTransformDraw?: (ev: ex.PostTransformDrawEvent) => void
-  onPreDebugDraw?: (ev: ex.PreDebugDrawEvent) => void
-  onPostDebugDraw?: (ev: ex.PostDebugDrawEvent) => void
-  onPointerUp?: (ev: ex.PointerEvent) => void
-  onPointerDown?: (ev: ex.PointerEvent) => void
-  onPointerEnter?: (ev: ex.PointerEvent) => void
-  onPointerLeave?: (ev: ex.PointerEvent) => void
-  onPointerMove?: (ev: ex.PointerEvent) => void
-  onPointerCancel?: (ev: ex.PointerEvent) => void
-  onWheel?: (ev: ex.WheelEvent) => void
-  onPointerDrag?: (ev: ex.PointerEvent) => void
-  onPointerDragEnd?: (ev: ex.PointerEvent) => void
-  onPointerDragEnter?: (ev: ex.PointerEvent) => void
-  onPointerDragLeave?: (ev: ex.PointerEvent) => void
-  onPointerDragMove?: (ev: ex.PointerEvent) => void
+  onPreUpdate?: (ev: PreUpdateEvent) => void
+  onPostUpdate?: (ev: PostUpdateEvent) => void
+  onKill?: (ev: KillEvent) => void
+  onPreKill?: (ev: PreKillEvent) => void
+  onPostKill?: (ev: PostKillEvent) => void
+  onPreDraw?: (ev: PreDrawEvent) => void
+  onPostDraw?: (ev: PostDrawEvent) => void
+  onPreTransformDraw?: (ev: PreTransformDrawEvent) => void
+  onPostTransformDraw?: (ev: PostTransformDrawEvent) => void
+  onPreDebugDraw?: (ev: PreDebugDrawEvent) => void
+  onPostDebugDraw?: (ev: PostDebugDrawEvent) => void
+  onPointerUp?: (ev: PointerEvent) => void
+  onPointerDown?: (ev: PointerEvent) => void
+  onPointerEnter?: (ev: PointerEvent) => void
+  onPointerLeave?: (ev: PointerEvent) => void
+  onPointerMove?: (ev: PointerEvent) => void
+  onPointerCancel?: (ev: PointerEvent) => void
+  onWheel?: (ev: WheelEvent) => void
+  onPointerDrag?: (ev: PointerEvent) => void
+  onPointerDragEnd?: (ev: PointerEvent) => void
+  onPointerDragEnter?: (ev: PointerEvent) => void
+  onPointerDragLeave?: (ev: PointerEvent) => void
+  onPointerDragMove?: (ev: PointerEvent) => void
 }
 
 /**
  * Base class for all UI elements.
  */
-export class UIElement extends ex.Entity {
-  _transform!: ex.TransformComponent
-  _graphics!: ex.GraphicsComponent
-  _pointer!: ex.PointerComponent
+export class UIElement extends Entity {
+  _transform!: TransformComponent
+  _graphics!: GraphicsComponent
+  _pointer!: PointerComponent
 
-  declare events: ex.EventEmitter
+  declare events: EventEmitter
 
   uiContainer?: UIContainer
 
   constructor() {
     super()
-    this._transform = new ex.TransformComponent()
-    this._graphics = new ex.GraphicsComponent()
-    this._pointer = new ex.PointerComponent()
-    this.graphics.anchor = ex.Vector.Zero
+    this._transform = new TransformComponent()
+    this._graphics = new GraphicsComponent()
+    this._pointer = new PointerComponent()
+    this.graphics.anchor = Vector.Zero
     this.addComponent(this.transform)
     this.addComponent(this.graphics)
     this.addComponent(this._pointer)
@@ -105,7 +127,7 @@ export class UIElement extends ex.Entity {
     return this._graphics
   }
 
-  get pointer(): ex.PointerComponent {
+  get pointer(): PointerComponent {
     return this._pointer
   }
 
@@ -116,7 +138,7 @@ export class UIElement extends ex.Entity {
   set width(value: number) {
     if (!this.graphics.current) return
     this.graphics.current.width = value
-    this.pointer.localBounds = new ex.BoundingBox(0, 0, value, this.height)
+    this.pointer.localBounds = new BoundingBox(0, 0, value, this.height)
   }
 
   get height() {
@@ -126,14 +148,14 @@ export class UIElement extends ex.Entity {
   set height(value: number) {
     if (!this.graphics.current) return
     this.graphics.current.height = value
-    this.pointer.localBounds = new ex.BoundingBox(0, 0, this.width, value)
+    this.pointer.localBounds = new BoundingBox(0, 0, this.width, value)
   }
 
   get anchor() {
     return this.graphics.anchor
   }
 
-  set anchor(value: ex.Vector) {
+  set anchor(value: Vector) {
     this.graphics.anchor = value
   }
 
@@ -141,7 +163,7 @@ export class UIElement extends ex.Entity {
     return this.transform.pos
   }
 
-  set pos(value: ex.Vector) {
+  set pos(value: Vector) {
     this.transform.pos = value
   }
 
@@ -182,7 +204,7 @@ export class UIElement extends ex.Entity {
     return this.transform.scale
   }
 
-  set scale(value: ex.Vector) {
+  set scale(value: Vector) {
     this.transform.scale = value
   }
 
@@ -195,7 +217,7 @@ export class UIElement extends ex.Entity {
   }
 
   set pointer(value: UIElementProps['pointer']) {
-    const pointer = this.get(ex.PointerComponent)
+    const pointer = this.get(PointerComponent)
     pointer.useGraphicsBounds =
       value?.useGraphicsBounds ?? pointer.useGraphicsBounds
     pointer.useColliderShape =
@@ -216,13 +238,13 @@ export class UIElement extends ex.Entity {
     this._dragging = false
   }
 
-  private _pointerDragMoveHandler = (pe: ex.PointerEvent) => {
+  private _pointerDragMoveHandler = (pe: PointerEvent) => {
     if (this._dragging) {
       this.pos = pe.worldPos
     }
   }
 
-  private _pointerDragLeaveHandler = (pe: ex.PointerEvent) => {
+  private _pointerDragLeaveHandler = (pe: PointerEvent) => {
     if (this._dragging) {
       this.pos = pe.worldPos
     }
@@ -299,26 +321,26 @@ export class UIElement extends ex.Entity {
   }
 }
 
-export type UIElementEvents = ex.EntityEvents & {
-  kill: ex.KillEvent
-  prekill: ex.PreKillEvent
-  postkill: ex.PostKillEvent
-  predraw: ex.PreDrawEvent
-  postdraw: ex.PostDrawEvent
-  pretransformdraw: ex.PreDrawEvent
-  posttransformdraw: ex.PostDrawEvent
-  predebugdraw: ex.PreDebugDrawEvent
-  postdebugdraw: ex.PostDebugDrawEvent
-  pointerup: ex.PointerEvent
-  pointerdown: ex.PointerEvent
-  pointerenter: ex.PointerEvent
-  pointerleave: ex.PointerEvent
-  pointermove: ex.PointerEvent
-  pointercancel: ex.PointerEvent
-  pointerwheel: ex.WheelEvent
-  pointerdragstart: ex.PointerEvent
-  pointerdragend: ex.PointerEvent
-  pointerdragenter: ex.PointerEvent
-  pointerdragleave: ex.PointerEvent
-  pointerdragmove: ex.PointerEvent
+export type UIElementEvents = EntityEvents & {
+  kill: KillEvent
+  prekill: PreKillEvent
+  postkill: PostKillEvent
+  predraw: PreDrawEvent
+  postdraw: PostDrawEvent
+  pretransformdraw: PreDrawEvent
+  posttransformdraw: PostDrawEvent
+  predebugdraw: PreDebugDrawEvent
+  postdebugdraw: PostDebugDrawEvent
+  pointerup: PointerEvent
+  pointerdown: PointerEvent
+  pointerenter: PointerEvent
+  pointerleave: PointerEvent
+  pointermove: PointerEvent
+  pointercancel: PointerEvent
+  pointerwheel: WheelEvent
+  pointerdragstart: PointerEvent
+  pointerdragend: PointerEvent
+  pointerdragenter: PointerEvent
+  pointerdragleave: PointerEvent
+  pointerdragmove: PointerEvent
 }

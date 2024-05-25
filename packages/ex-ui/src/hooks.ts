@@ -1,4 +1,12 @@
 import { createSignal, onCleanup } from 'solid-js'
+import {
+  Engine,
+  EngineEvents,
+  EventKey,
+  Handler,
+  Scene,
+  SceneEvents,
+} from 'excalibur'
 
 /**
  * Returns a signal that updates every engine update
@@ -17,7 +25,7 @@ export function useValue<T>(
   } = {},
 ) {
   const { timing = 'postupdate' } = opts
-  const engine = ex.Engine.useEngine()
+  const engine = Engine.useEngine()
 
   const [signal, setSignal] = createSignal<T>(getter())
   const setter = () => setSignal(() => getter())
@@ -32,14 +40,14 @@ export function useValue<T>(
 }
 
 export function useEngine() {
-  return ex.Engine.useEngine()
+  return Engine.useEngine()
 }
 
-export function useEngineEvent<TEventName extends ex.EventKey<ex.EngineEvents>>(
+export function useEngineEvent<TEventName extends EventKey<EngineEvents>>(
   event: TEventName,
-  listener: ex.Handler<ex.EngineEvents[TEventName]>,
+  listener: Handler<EngineEvents[TEventName]>,
 ) {
-  const engine = ex.Engine.useEngine()
+  const engine = Engine.useEngine()
 
   engine.on(event, listener)
 
@@ -48,10 +56,10 @@ export function useEngineEvent<TEventName extends ex.EventKey<ex.EngineEvents>>(
   })
 }
 
-export function useSceneEvent<TEventName extends ex.EventKey<ex.SceneEvents>>(
-  scene: ex.Scene,
+export function useSceneEvent<TEventName extends EventKey<SceneEvents>>(
+  scene: Scene,
   event: TEventName,
-  listener: ex.Handler<ex.SceneEvents[TEventName]>,
+  listener: Handler<SceneEvents[TEventName]>,
 ) {
   scene.on(event, listener)
 

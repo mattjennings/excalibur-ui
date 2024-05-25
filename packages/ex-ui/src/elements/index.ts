@@ -1,13 +1,14 @@
 import text from './text'
 import rectangle from './rectangle'
+import { Entity } from 'excalibur'
 
 export const elements: Record<string, ElementDefinition<any, any>> = {
   'ex-text': text,
   'ex-rectangle': rectangle,
 }
 
-interface ElementDefinition<
-  Instance extends ex.Entity,
+export interface ElementDefinition<
+  Instance extends Entity,
   Props extends Record<string, any>,
 > {
   init: () => Instance
@@ -19,15 +20,18 @@ interface ElementDefinition<
 }
 
 export function createElement<
-  Instance extends ex.Entity,
+  Instance extends Entity,
   Props extends Record<string, any>,
 >(args: ElementDefinition<Instance, Props>) {
   return args
 }
 
 export function registerElement<
-  Instance extends ex.Entity,
+  Instance extends Entity,
   Props extends Record<string, any>,
 >(name: string, definition: ElementDefinition<Instance, Props>) {
   elements[name] = createElement(definition)
 }
+
+export { RectangleProps, RectangleElement } from './rectangle'
+export { TextProps, TextElement } from './text'

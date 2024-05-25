@@ -1,6 +1,5 @@
-import { renderUI, useEngineEvent, useValue } from 'ex-ui'
+import { renderUI, useValue } from 'ex-ui'
 import { Engine } from 'excalibur'
-import { createSignal } from 'solid-js'
 
 export default class Level1 extends ex.Scene {
   time = 0

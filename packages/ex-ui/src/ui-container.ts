@@ -1,3 +1,11 @@
+import {
+  Entity,
+  Engine,
+  TransformComponent,
+  GraphicsComponent,
+  Vector,
+} from 'excalibur'
+
 /**
  * When 'native' the UI will be sized to the actual "css" pixels of the canvas.
  * In other words, it will be a higher resolution for devices that support it.
@@ -9,16 +17,16 @@
  */
 export type Resolution = 'native' | 'scaled'
 
-export class UIContainer extends ex.Entity {
+export class UIContainer extends Entity {
   htmlElement: HTMLElement
-  engine!: ex.Engine
+  engine!: Engine
   resolution: Resolution
   resizeObserver: ResizeObserver | null = null
 
   parentElement!: HTMLElement
 
-  transform: ex.TransformComponent
-  graphics: ex.GraphicsComponent
+  transform: TransformComponent
+  graphics: GraphicsComponent
 
   constructor({
     tag = 'div',
@@ -44,9 +52,9 @@ export class UIContainer extends ex.Entity {
     this.parentElement = parent
     this.parentElement.appendChild(this.htmlElement)
 
-    this.transform = new ex.TransformComponent()
-    this.graphics = new ex.GraphicsComponent()
-    this.graphics.anchor = ex.Vector.Zero
+    this.transform = new TransformComponent()
+    this.graphics = new GraphicsComponent()
+    this.graphics.anchor = Vector.Zero
     this.addComponent(this.transform)
     this.addComponent(this.graphics)
 
@@ -62,7 +70,7 @@ export class UIContainer extends ex.Entity {
     }
   }
 
-  onInitialize(engine: ex.Engine): void {
+  onInitialize(engine: Engine): void {
     this.engine = engine
     this.resizeToCanvas()
     this.engine.currentScene.on('activate', () => {

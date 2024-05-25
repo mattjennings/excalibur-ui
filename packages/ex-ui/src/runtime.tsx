@@ -1,10 +1,11 @@
 import { createSignal, onCleanup } from 'solid-js'
 import { createRenderer } from 'solid-js/universal'
-import { elements } from './elements'
+import { RectangleProps, TextProps, elements } from './elements'
 import { Resolution, UIContainer } from './ui-container'
 import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
+import { Entity, Scene } from 'excalibur'
 
-type ExElement = ex.Entity & {
+type ExElement = Entity & {
   __exui?: { type: string }
 }
 type NodeType = ExElement | HTMLElement | Text
@@ -194,7 +195,7 @@ const {
  * Renders a Solid JSX UI into an Excalibur scene or entity. Only call this
  * once i.e during intialization of scene or entity.
  */
-function renderUI<T extends ex.Scene | ex.Entity>(
+function renderUI<T extends Scene | Entity>(
   sceneOrEntity: T,
   ui: () => NodeType,
   options?: {
@@ -249,16 +250,16 @@ function renderUI<T extends ex.Scene | ex.Entity>(
   }
 }
 
-function isEntity(node: ex.Entity | ex.Scene): node is ex.Entity {
-  return node instanceof ex.Entity
+function isEntity(node: Entity | Scene): node is Entity {
+  return node instanceof Entity
 }
 
-function isScene(node: ex.Entity | ex.Scene): node is ex.Scene {
-  return node instanceof ex.Scene
+function isScene(node: Entity | Scene): node is Scene {
+  return node instanceof Scene
 }
 
 function isExElement(node: NodeType): node is ExElement {
-  return node instanceof ex.Entity
+  return node instanceof Entity
 }
 
 function isHtmlElement(node: NodeType): node is HTMLElement {
@@ -301,6 +302,9 @@ export {
 
 declare global {
   namespace JSX {
-    interface IntrinsicElements extends JSXSolid.IntrinsicElements {}
+    interface IntrinsicElements extends JSXSolid.IntrinsicElements {
+      'ex-text': TextProps
+      'ex-rectangle': RectangleProps
+    }
   }
 }

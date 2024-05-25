@@ -1,5 +1,6 @@
 import { createElement } from '.'
 import { UIElement, UIElementProps } from '../ui-element'
+import { Rectangle, Color } from 'excalibur'
 
 export default createElement({
   init() {
@@ -18,14 +19,14 @@ export interface RectangleProps extends UIElementProps {
   color?: ex.Color | string
 }
 
-class RectangleElement extends UIElement {
+export class RectangleElement extends UIElement {
   constructor() {
     super()
     this.graphics.add(
-      new ex.Rectangle({
+      new Rectangle({
         width: 1,
         height: 1,
-        color: ex.Color.Black,
+        color: Color.Black,
       }),
     )
   }
@@ -41,15 +42,7 @@ class RectangleElement extends UIElement {
   set color(value: RectangleProps['color']) {
     if (value) {
       this._currentGraphic.color =
-        typeof value === 'string' ? ex.Color.fromHex(value as string) : value
-    }
-  }
-}
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'ex-rectangle': RectangleProps
+        typeof value === 'string' ? Color.fromHex(value as string) : value
     }
   }
 }

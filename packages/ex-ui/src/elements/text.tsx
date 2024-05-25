@@ -1,5 +1,14 @@
 import { createElement } from '.'
 import { UIElement, UIElementProps } from '../ui-element'
+import {
+  Color,
+  SpriteFont,
+  FontOptions,
+  GraphicOptions,
+  RasterOptions,
+  Text,
+  Font,
+} from 'excalibur'
 
 export default createElement({
   init() {
@@ -16,38 +25,35 @@ export default createElement({
 
 export interface TextProps extends UIElementProps {
   text?: string
-  color?: ex.Color | string
-  font?:
-    | ex.Font
-    | ex.SpriteFont
-    | (ex.FontOptions & ex.GraphicOptions & ex.RasterOptions)
+  color?: Color | string
+  font?: Font | SpriteFont | (FontOptions & GraphicOptions & RasterOptions)
   width?: never
   height?: never
 }
 
-class TextElement extends UIElement {
+export class TextElement extends UIElement {
   constructor() {
     super()
     this.graphics.add(
-      new ex.Text({
+      new Text({
         text: '',
-        color: ex.Color.Black,
+        color: Color.Black,
       }),
     )
   }
 
   private get _currentGraphic() {
-    return this.graphics.current as ex.Text
+    return this.graphics.current as Text
   }
 
-  get color(): ex.Color | undefined {
+  get color(): Color | undefined {
     return this._currentGraphic?.color
   }
 
   set color(value: TextProps['color']) {
     if (value) {
       this._currentGraphic.color =
-        typeof value === 'string' ? ex.Color.fromHex(value as string) : value
+        typeof value === 'string' ? Color.fromHex(value as string) : value
     }
   }
 
@@ -64,18 +70,10 @@ class TextElement extends UIElement {
   }
 
   set font(value: TextProps['font']) {
-    if (value instanceof ex.Font || value instanceof ex.SpriteFont) {
+    if (value instanceof Font || value instanceof SpriteFont) {
       this._currentGraphic.font = value
     } else {
-      this._currentGraphic.font = new ex.Font(value)
-    }
-  }
-}
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'ex-text': TextProps
+      this._currentGraphic.font = new Font(value)
     }
   }
 }
