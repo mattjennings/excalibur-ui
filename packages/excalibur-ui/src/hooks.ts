@@ -25,34 +25,34 @@ export function useValue<T>(
   } = {},
 ) {
   const { timing = 'postupdate', ...signalOptions } = opts
-  const engine = Engine.useEngine()
+  const engine = useEngine()
 
   const [signal, setSignal] = createSignal<T>(getter(), signalOptions)
   const setter = () => setSignal(() => getter())
 
-  engine.on(timing, setter)
+  engine().on(timing, setter)
 
   onCleanup(() => {
-    engine.off(timing, setter)
+    engine().off(timing, setter)
   })
 
   return signal
 }
 
 export function useEngine() {
-  return Engine.useEngine()
+  return () => Engine.useEngine()
 }
 
 export function useEngineEvent<TEventName extends EventKey<EngineEvents>>(
   event: TEventName,
   listener: Handler<EngineEvents[TEventName]>,
 ) {
-  const engine = Engine.useEngine()
+  const engine = useEngine()
 
-  engine.on(event, listener)
+  engine().on(event, listener)
 
   onCleanup(() => {
-    engine.off(event, listener)
+    engine().off(event, listener)
   })
 }
 

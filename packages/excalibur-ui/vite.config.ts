@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: 'excalibur-ui',
     },
     rollupOptions: {
-      external: ['excalibur'],
+      external: ['excalibur', 'solid-js'],
       output: {
         globals: {
           excalibur: 'ex',

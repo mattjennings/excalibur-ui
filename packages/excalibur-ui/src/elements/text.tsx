@@ -29,6 +29,7 @@ export interface TextProps<T extends TextElement = TextElement>
   text?: string
   color?: Color | string
   font?: Font | SpriteFont | (FontOptions & GraphicOptions & RasterOptions)
+  maxWidth?: number
   width?: never
   height?: never
 }
@@ -38,7 +39,6 @@ export class TextElement extends GraphicElement {
     super()
     this.graphic = new Text({
       text: '',
-      color: Color.Black,
     })
   }
 
@@ -76,8 +76,20 @@ export class TextElement extends GraphicElement {
   set font(value: TextProps['font']) {
     if (value instanceof Font || value instanceof SpriteFont) {
       this.graphic.font = value
-    } else {
+    } else if (value) {
       this.graphic.font = new Font(value)
+
+      if ('color' in value) {
+        this.color = value.color
+      }
     }
+  }
+
+  get maxWidth() {
+    return this.graphic.maxWidth
+  }
+
+  set maxWidth(value: TextProps['maxWidth']) {
+    this.graphic.maxWidth = value
   }
 }
