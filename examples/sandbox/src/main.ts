@@ -1,10 +1,12 @@
 import './style.css'
+import { createMenu } from './menu'
 
-const INITIAL_SCENE = 'dialogue'
+const query = new URLSearchParams(window.location.search)
+const INITIAL_SCENE = query.get('scene') || 'test'
 
 // load all scenes from ./scenes directory where folder name is the scene name
 // and the scene file is named `scene.tsx`
-const scenes = import.meta.glob('./scenes/**/*/scene.tsx', {
+const sceneFiles = import.meta.glob('./scenes/**/*/scene.tsx', {
   eager: true,
 }) as Record<
   string,
@@ -18,26 +20,29 @@ const scenes = import.meta.glob('./scenes/**/*/scene.tsx', {
   }
 >
 
+export const scenes = Object.entries(sceneFiles).reduce((acc, [key, scene]) => {
+  const name = key
+    .split('/scenes/')[1]
+    .split('.ts')[0]
+    .replace(/\/scene$/, '')
+
+  return {
+    ...acc,
+    [name]: {
+      scene: scene.default,
+      loader: scene.loader,
+      transitions: scene.transitions,
+    },
+  }
+}, {})
+
 const game = new ex.Engine<string>({
   width: 800,
   height: 600,
-  displayMode: ex.DisplayMode.FitScreen,
+  displayMode: ex.DisplayMode.FitContainer,
   pixelArt: true,
-  scenes: Object.entries(scenes).reduce((acc, [key, scene]) => {
-    const name = key
-      .split('/scenes/')[1]
-      .split('.ts')[0]
-      .replace(/\/scene$/, '')
-
-    return {
-      ...acc,
-      [name]: {
-        scene: scene.default,
-        loader: scene.loader,
-        transitions: scene.transitions,
-      },
-    }
-  }, {}),
+  canvasElementId: 'game',
+  scenes,
 })
 
 game.start(INITIAL_SCENE, {
@@ -46,4 +51,17 @@ game.start(INITIAL_SCENE, {
     direction: 'in',
     color: ex.Color.ExcaliburBlue,
   }),
+})
+
+createMenu()
+
+// @ts-ignore
+window.navigation?.addEventListener('navigate', (event) => {
+  const destination = event.destination.url
+  const query = new URL(destination).searchParams
+  const scene = query.get('scene')
+
+  if (scene) {
+    game.goToScene(scene)
+  }
 })

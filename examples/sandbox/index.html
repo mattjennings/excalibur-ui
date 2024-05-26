@@ -6,7 +6,64 @@
     <title>Excalibur Game</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div id="sidebar">
+        <h1>Scene Selector</h1>
+        <ul id="scene-list"></ul>
+      </div>
+      <div id="game-container">
+        <canvas id="game"></canvas>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      #app {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      #app h1 {
+        margin: 0;
+        padding: 10px;
+        background-color: #222;
+        color: white;
+        font-size: 1.5em;
+      }
+
+      #app a {
+        color: white;
+        opacity: 0.75;
+      }
+
+      #app a.active {
+        color: #00cccc;
+        opacity: 1;
+      }
+
+      #sidebar {
+        width: 200px;
+        background-color: #333;
+        color: white;
+      }
+
+      #game-container {
+        background: black;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+      }
+
+      #game {
+        margin: auto;
+      }
+    </style>
   </body>
 </html>

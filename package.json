@@ -8,6 +8,8 @@
     "./examples/sandbox"
   ],
   "scripts": {
+    "dev": "(cd packages/excalibur-ui && npm run dev) & (npm run sandbox)",
+    "sandbox": "(cd examples/sandbox && npm run dev)",
     "prettier": "prettier --write .",
     "prettier:check": "prettier --check ."
   },
