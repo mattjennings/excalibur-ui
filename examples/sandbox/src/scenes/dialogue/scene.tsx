@@ -14,32 +14,25 @@ export default class Dialogue extends ex.Scene {
     'The end.',
   ]
 
-  currentLine = 0
-
   onInitialize() {
-    const text = useValue(() => this.dialogue[this.currentLine])
-    const [typed, setText] = useTypewriter(text())
+    const [currentLine, setCurrentLine] = createSignal(0)
+    const [typed, setText] = useTypewriter(this.dialogue[0])
 
     const playNextLine = () => {
-      if (typed() === text()) {
-        if (this.dialogue[this.currentLine + 1]) {
-          this.currentLine++
+      if (typed() === this.dialogue[currentLine()]) {
+        if (this.dialogue[currentLine() + 1]) {
+          setCurrentLine(currentLine() + 1)
         } else {
-          this.currentLine = 0
+          setCurrentLine(0)
         }
-        const nextLine = this.dialogue[this.currentLine]
+        const nextLine = this.dialogue[currentLine()]
 
         setText(nextLine)
       }
     }
 
-    this.input.pointers.on('down', () => {
-      playNextLine()
-    })
-
-    this.input.keyboard.on('press', () => {
-      playNextLine()
-    })
+    this.input.pointers.on('down', playNextLine)
+    this.input.keyboard.on('press', playNextLine)
 
     renderUI(this, () => {
       return <TextBox pos={ex.vec(0, 200)} text={typed()} />
