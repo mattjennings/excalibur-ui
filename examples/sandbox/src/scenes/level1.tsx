@@ -7,24 +7,6 @@ export default class Level1 extends ex.Scene {
 
   onInitialize() {
     this.add(new Player())
-    // renderUI(this, () => {
-    //   const pos = useValue(() => this.pos)
-    //   return (
-    //     <>
-    //       <text
-    //         text="Hello World!"
-    //         pos={pos()}
-    //         color="#ffffff"
-    //         font={{
-    //           size: 50,
-    //           family: 'Arial',
-    //         }}
-    //       >
-    //         <rectangle width={200} height={200} color="#ff0000" z={-1} />
-    //       </text>
-    //     </>
-    //   )
-    // })
   }
 
   onPreUpdate(engine: Engine<any>, delta: number): void {
@@ -59,13 +41,16 @@ class Player extends ex.Actor {
 
     renderUI(this, () => {
       const pos = useValue(() => this.pos)
-      const screenPos = useValue(() =>
-        this.scene!.engine.worldToScreenCoordinates(this.pos),
-      )
 
       return (
         <>
-          <button>i'm a normal button</button>
+          <ex-view pos={ex.vec(100, 100)}>
+            <ex-graphic
+              width={800}
+              graphic={new ex.Circle({ radius: 5, color: ex.Color.Red })}
+            />
+          </ex-view>
+          {/* <button>i'm a normal button</button>
           <ex-rectangle
             html={(props) => (
               <button
@@ -105,7 +90,7 @@ class Player extends ex.Actor {
               size: 20,
               family: 'Arial',
             }}
-          />
+          /> */}
         </>
       )
     })

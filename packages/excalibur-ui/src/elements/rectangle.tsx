@@ -1,8 +1,9 @@
-import { createElement } from '.'
-import { UIElement, UIElementProps } from '../ui-element'
-import { Rectangle, Color } from 'excalibur'
+import { createExElement } from '.'
 
-export default createElement({
+import { Color, Rectangle } from 'excalibur'
+import { GraphicElement, GraphicProps } from './graphic'
+
+export default createExElement({
   init() {
     return new RectangleElement()
   },
@@ -15,33 +16,37 @@ export default createElement({
   },
 })
 
-export interface RectangleProps extends UIElementProps {
+export interface RectangleProps extends Omit<GraphicProps, 'graphic' | 'ref'> {
+  ref?: (el: RectangleElement) => void
   color?: ex.Color | string
 }
 
-export class RectangleElement extends UIElement {
+export class RectangleElement extends GraphicElement {
   constructor() {
     super()
-    this.graphics.add(
-      new Rectangle({
-        width: 1,
-        height: 1,
-        color: Color.Black,
-      }),
-    )
+    this.graphic = new Rectangle({
+      width: 1,
+      height: 1,
+      color: Color.Black,
+    })
   }
 
-  private get _currentGraphic() {
+  get graphic() {
     return this.graphics.current as ex.Rectangle
   }
 
+  set graphic(value: ex.Rectangle) {
+    super.graphic = value
+    console.log(this.localBounds)
+  }
+
   get color(): ex.Color | undefined {
-    return this._currentGraphic?.color
+    return this.graphic.color
   }
 
   set color(value: RectangleProps['color']) {
     if (value) {
-      this._currentGraphic.color =
+      this.graphic.color =
         typeof value === 'string' ? Color.fromHex(value as string) : value
     }
   }

@@ -1,9 +1,26 @@
 import { createSignal, onCleanup } from 'solid-js'
 import { createRenderer } from 'solid-js/universal'
-import { RectangleProps, TextProps, elements } from './elements'
+import {
+  GraphicProps,
+  RectangleProps,
+  TextProps,
+  ViewProps,
+  elements,
+} from './elements'
 import { Resolution, UIContainer } from './ui-container'
 import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
 import { Entity, Scene } from 'excalibur'
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends JSXSolid.IntrinsicElements {
+      'ex-text': TextProps
+      'ex-rectangle': RectangleProps
+      'ex-view': ViewProps
+      'ex-graphic': GraphicProps
+    }
+  }
+}
 
 type ExElement = Entity & {
   __exui?: { type: string }
@@ -71,7 +88,6 @@ const {
           node.on(event, listener)
 
           onCleanup(() => {
-            debugger
             // @ts-ignore
             node.off(event, listener)
           })
@@ -214,27 +230,35 @@ function renderUI<T extends Scene | Entity>(
 
   scene.on('predraw', () => {
     if (!didRender()) {
-      setDidRender(true)
-      render(ui, container)
+      if (container) {
+        setDidRender(true)
+        render(ui, container)
+      }
     }
   })
 
+  const setup = () => {
+    container = new UIContainer(options?.html)
+    scene.add(container)
+  }
+
   if (isScene(sceneOrEntity)) {
-    scene.on('activate', () => {
-      container = new UIContainer(options?.html)
-      scene.add(container)
-    })
+    const isCurrentScene = sceneOrEntity === sceneOrEntity.engine.currentScene
+    if (isCurrentScene && scene.isInitialized) {
+      setup()
+    } else {
+      scene.on('activate', () => {
+        setup()
+      })
+    }
 
     scene.on('deactivate', () => {
-      container.kill()
+      if (container) {
+        container.kill()
+      }
       setDidRender(false)
     })
   } else if (isEntity(sceneOrEntity)) {
-    const setup = () => {
-      container = new UIContainer(options?.html)
-      scene.add(container)
-    }
-
     if (sceneOrEntity.isInitialized) {
       setup()
     } else {
@@ -244,7 +268,9 @@ function renderUI<T extends Scene | Entity>(
     }
 
     sceneOrEntity.on('kill', () => {
-      container.kill()
+      if (container) {
+        container.kill()
+      }
       setDidRender(false)
     })
   }
@@ -299,12 +325,3 @@ export {
   Index,
   ErrorBoundary,
 } from 'solid-js'
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements extends JSXSolid.IntrinsicElements {
-      'ex-text': TextProps
-      'ex-rectangle': RectangleProps
-    }
-  }
-}
