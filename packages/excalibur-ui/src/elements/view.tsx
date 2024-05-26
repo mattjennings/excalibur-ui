@@ -1,5 +1,7 @@
+import { createExElement } from '.'
+
 import { Accessor, createSignal } from 'solid-js'
-import { UIContainer } from './ui-container'
+
 import {
   Vector,
   PreUpdateEvent,
@@ -15,33 +17,48 @@ import {
   PostDebugDrawEvent,
   Entity,
   TransformComponent,
-  GraphicsComponent,
   PointerComponent,
   EventEmitter,
   BoundingBox,
   EntityEvents,
   PointerEvent,
 } from 'excalibur'
+import { UIContainer } from '../ui-container'
 
-export interface UIElementProps {
-  ref?: (el: UIElement) => void
+export default createExElement({
+  init() {
+    return new ViewElement()
+  },
+  applyProp(instance, prop, value) {
+    switch (prop) {
+      default:
+        // @ts-ignore
+        instance[prop] = value
+    }
+  },
+})
+
+export interface ViewProps {
+  ref?: (el: ViewElement) => void
   pos?: Vector
   x?: number
   y?: number
   z?: number
+
   width?: number
   height?: number
+
   anchor?: Vector
   opacity?: number
   scale?: Vector
   rotation?: number
-  pointer?: {
-    useGraphicsBounds?: boolean
-    useColliderShape?: boolean
-  }
-  html?: (props: Accessor<Record<string, any>>) => HTMLElement
 
-  draggable?: boolean
+  /**
+   * If true, the element will use the bounds of its children to calculate its own bounds.
+   */
+  useChildBounds?: boolean
+
+  html?: (props: Accessor<Record<string, any>>) => HTMLElement
 
   onPreUpdate?: (ev: PreUpdateEvent) => void
   onPostUpdate?: (ev: PostUpdateEvent) => void
@@ -71,10 +88,12 @@ export interface UIElementProps {
 /**
  * Base class for all UI elements.
  */
-export class UIElement extends Entity {
-  _transform!: TransformComponent
-  _graphics!: GraphicsComponent
-  _pointer!: PointerComponent
+export class ViewElement extends Entity {
+  private _transform!: TransformComponent
+  private _pointer!: PointerComponent
+
+  private _useChildBounds = true
+  private _localBounds: BoundingBox = new BoundingBox(0, 0, 0, 0)
 
   declare events: EventEmitter
 
@@ -83,11 +102,9 @@ export class UIElement extends Entity {
   constructor() {
     super()
     this._transform = new TransformComponent()
-    this._graphics = new GraphicsComponent()
+
     this._pointer = new PointerComponent()
-    this.graphics.anchor = Vector.Zero
-    this.addComponent(this.transform)
-    this.addComponent(this.graphics)
+    this.addComponent(this._transform)
     this.addComponent(this._pointer)
 
     this.on('predraw', () => {
@@ -104,6 +121,12 @@ export class UIElement extends Entity {
           break
         }
         parent = parent.parent
+      }
+    })
+
+    this.childrenAdded$.subscribe(() => {
+      if (this.useChildBounds) {
+        this.calculateBounds()
       }
     })
   }
@@ -123,40 +146,33 @@ export class UIElement extends Entity {
     return this._transform
   }
 
-  get graphics() {
-    return this._graphics
-  }
-
   get pointer(): PointerComponent {
     return this._pointer
   }
 
+  get localBounds() {
+    return this._localBounds
+  }
+
+  set localBounds(value: BoundingBox) {
+    this._localBounds = value
+    this.pointer.localBounds = value
+  }
+
   get width() {
-    return this.graphics.current?.width ?? 0
+    return this.localBounds.width
   }
 
   set width(value: number) {
-    if (!this.graphics.current) return
-    this.graphics.current.width = value
-    this.pointer.localBounds = new BoundingBox(0, 0, value, this.height)
+    this.localBounds = new BoundingBox(0, 0, value, this.height)
   }
 
   get height() {
-    return this.graphics.current?.height ?? 0
+    return this.localBounds.height
   }
 
   set height(value: number) {
-    if (!this.graphics.current) return
-    this.graphics.current.height = value
-    this.pointer.localBounds = new BoundingBox(0, 0, this.width, value)
-  }
-
-  get anchor() {
-    return this.graphics.anchor
-  }
-
-  set anchor(value: Vector) {
-    this.graphics.anchor = value
+    this.localBounds = new BoundingBox(0, 0, this.width, value)
   }
 
   get pos() {
@@ -191,15 +207,6 @@ export class UIElement extends Entity {
     this.transform.z = value
   }
 
-  get opacity() {
-    return this.graphics.current?.opacity ?? 1
-  }
-
-  set opacity(value: number) {
-    if (!this.graphics.current) return
-    this.graphics.current.opacity = value
-  }
-
   get scale() {
     return this.transform.scale
   }
@@ -214,62 +221,6 @@ export class UIElement extends Entity {
 
   set rotation(value: number) {
     this.transform.rotation = value
-  }
-
-  set pointer(value: UIElementProps['pointer']) {
-    const pointer = this.get(PointerComponent)
-    pointer.useGraphicsBounds =
-      value?.useGraphicsBounds ?? pointer.useGraphicsBounds
-    pointer.useColliderShape =
-      value?.useColliderShape ?? pointer.useColliderShape
-  }
-
-  /**
-   * Draggable helper
-   */
-  private _draggable: boolean = false
-  private _dragging: boolean = false
-
-  private _pointerDragStartHandler = () => {
-    this._dragging = true
-  }
-
-  private _pointerDragEndHandler = () => {
-    this._dragging = false
-  }
-
-  private _pointerDragMoveHandler = (pe: PointerEvent) => {
-    if (this._dragging) {
-      this.pos = pe.worldPos
-    }
-  }
-
-  private _pointerDragLeaveHandler = (pe: PointerEvent) => {
-    if (this._dragging) {
-      this.pos = pe.worldPos
-    }
-  }
-
-  public get draggable(): boolean {
-    return this._draggable
-  }
-
-  public set draggable(isDraggable: boolean) {
-    if (isDraggable) {
-      if (isDraggable && !this._draggable) {
-        this.events.on('pointerdragstart', this._pointerDragStartHandler)
-        this.events.on('pointerdragend', this._pointerDragEndHandler)
-        this.events.on('pointerdragmove', this._pointerDragMoveHandler)
-        this.events.on('pointerdragleave', this._pointerDragLeaveHandler)
-      } else if (!isDraggable && this._draggable) {
-        this.events.off('pointerdragstart', this._pointerDragStartHandler)
-        this.events.off('pointerdragend', this._pointerDragEndHandler)
-        this.events.off('pointerdragmove', this._pointerDragMoveHandler)
-        this.events.off('pointerdragleave', this._pointerDragLeaveHandler)
-      }
-
-      this._draggable = isDraggable
-    }
   }
 
   private _htmlElement: HTMLElement | null = null
@@ -310,18 +261,50 @@ export class UIElement extends Entity {
 
     return {
       style: {
-        // visibility: 'hidden',
         position: 'absolute',
-        left: this.toCssPx(screenPos.x - this.width * this.anchor.x),
-        top: this.toCssPx(screenPos.y - this.height * this.anchor.y),
+        left: this.toCssPx(screenPos.x - this.width),
+        top: this.toCssPx(screenPos.y - this.height),
         width: this.toCssPx(this.width),
         height: this.toCssPx(this.height),
       },
     }
   }
+
+  get useChildBounds() {
+    return this._useChildBounds
+  }
+
+  set useChildBounds(value: boolean) {
+    this._useChildBounds = value
+    if (value) {
+      this.calculateBounds()
+    }
+  }
+
+  private calculateBounds() {
+    if (this.useChildBounds) {
+      let maxWidth = this.localBounds.width
+      let maxHeight = this.localBounds.height
+
+      for (const child of this.children) {
+        if (child instanceof ViewElement) {
+          const bounds = child.localBounds
+          if (bounds.width > maxWidth) {
+            maxWidth = bounds.width
+          }
+
+          if (bounds.height > maxHeight) {
+            maxHeight = bounds.height
+          }
+        }
+      }
+
+      this.localBounds = new BoundingBox(0, 0, maxWidth, maxHeight)
+    }
+  }
 }
 
-export type UIElementEvents = EntityEvents & {
+export type ViewElementEvents = EntityEvents & {
   kill: KillEvent
   prekill: PreKillEvent
   postkill: PostKillEvent

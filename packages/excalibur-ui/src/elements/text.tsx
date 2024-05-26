@@ -1,5 +1,6 @@
 import { createExElement } from '.'
-import { UIElement, UIElementProps } from '../ui-element'
+import { GraphicElement, GraphicProps } from './graphic'
+
 import {
   Color,
   SpriteFont,
@@ -23,7 +24,7 @@ export default createExElement({
   },
 })
 
-export interface TextProps extends UIElementProps {
+export interface TextProps extends GraphicProps {
   text?: string
   color?: Color | string
   font?: Font | SpriteFont | (FontOptions & GraphicOptions & RasterOptions)
@@ -31,49 +32,51 @@ export interface TextProps extends UIElementProps {
   height?: never
 }
 
-export class TextElement extends UIElement {
+export class TextElement extends GraphicElement {
   constructor() {
     super()
-    this.graphics.add(
-      new Text({
-        text: '',
-        color: Color.Black,
-      }),
-    )
+    this.graphic = new Text({
+      text: '',
+      color: Color.Black,
+    })
   }
 
-  private get _currentGraphic() {
-    return this.graphics.current as Text
+  get graphic(): Text {
+    return super.graphic as Text
+  }
+
+  set graphic(value: Text) {
+    super.graphic = value
   }
 
   get color(): Color | undefined {
-    return this._currentGraphic?.color
+    return this.graphic?.color
   }
 
   set color(value: TextProps['color']) {
     if (value) {
-      this._currentGraphic.color =
+      this.graphic.color =
         typeof value === 'string' ? Color.fromHex(value as string) : value
     }
   }
 
   get text(): string {
-    return this._currentGraphic.text
+    return this.graphic.text
   }
 
   set text(value: TextProps['text']) {
-    this._currentGraphic.text = value ?? ''
+    this.graphic.text = value ?? ''
   }
 
   get font() {
-    return this._currentGraphic.font
+    return this.graphic.font
   }
 
   set font(value: TextProps['font']) {
     if (value instanceof Font || value instanceof SpriteFont) {
-      this._currentGraphic.font = value
+      this.graphic.font = value
     } else {
-      this._currentGraphic.font = new Font(value)
+      this.graphic.font = new Font(value)
     }
   }
 }

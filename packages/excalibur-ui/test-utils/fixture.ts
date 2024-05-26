@@ -3,7 +3,8 @@ import { test as base } from 'vitest'
 import { WebAudio } from 'excalibur'
 import * as ex from 'excalibur'
 import { renderUI } from '../src/runtime'
-import { commands } from '@vitest/browser/context'
+import { UIContainer } from '../src/ui-container'
+import { ViewElement } from '../src'
 
 // @ts-ignore - suppress audio warning
 WebAudio._UNLOCKED = true
@@ -84,6 +85,11 @@ export const test = base.extend<{
     await use((ui) => {
       renderUI(scene, ui)
       clock.step(1000)
+
+      return (
+        scene.entities.find((entity) => entity instanceof UIContainer)
+          ?.children ?? []
+      )
     })
   },
 })
@@ -105,6 +111,6 @@ declare module 'vitest' {
     clock: ex.TestClock
     useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
     dispatchKeyEvent: (type: string, key: string) => void
-    renderUI: (ui: () => any) => void
+    renderUI: <T extends ViewElement>(ui: () => any) => T[]
   }
 }

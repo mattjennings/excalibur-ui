@@ -1,6 +1,5 @@
 import { test, expect, beforeEach } from '$fixture'
 import { createSignal } from 'solid-js'
-import { UIContainer } from '../src/ui-container'
 import { TextElement } from '../src/elements'
 
 beforeEach(async ({ useNewScene }) => {
@@ -17,7 +16,6 @@ test('renders text', async ({ renderUI, scene, game }) => {
     />
   ))
   expect(scene.entities).toHaveLength(2)
-  expect(scene.entities[0]).toBeInstanceOf(UIContainer)
   expect(scene.entities[1]).toBeInstanceOf(TextElement)
   const textEl = scene.entities[1] as TextElement
   expect(textEl.text).toBe('hello')

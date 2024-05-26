@@ -1,9 +1,26 @@
 import { createSignal, onCleanup } from 'solid-js'
 import { createRenderer } from 'solid-js/universal'
-import { RectangleProps, TextProps, elements } from './elements'
+import {
+  GraphicProps,
+  RectangleProps,
+  TextProps,
+  ViewProps,
+  elements,
+} from './elements'
 import { Resolution, UIContainer } from './ui-container'
 import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
 import { Entity, Scene } from 'excalibur'
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends JSXSolid.IntrinsicElements {
+      'ex-text': TextProps
+      'ex-rectangle': RectangleProps
+      'ex-view': ViewProps
+      'ex-graphic': GraphicProps
+    }
+  }
+}
 
 type ExElement = Entity & {
   __exui?: { type: string }
@@ -71,7 +88,6 @@ const {
           node.on(event, listener)
 
           onCleanup(() => {
-            debugger
             // @ts-ignore
             node.off(event, listener)
           })
@@ -309,12 +325,3 @@ export {
   Index,
   ErrorBoundary,
 } from 'solid-js'
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements extends JSXSolid.IntrinsicElements {
-      'ex-text': TextProps
-      'ex-rectangle': RectangleProps
-    }
-  }
-}

@@ -1,6 +1,7 @@
 import { createExElement } from '.'
-import { UIElement, UIElementProps } from '../ui-element'
-import { Rectangle, Color } from 'excalibur'
+
+import { Color, Rectangle } from 'excalibur'
+import { GraphicElement, GraphicProps } from './graphic'
 
 export default createExElement({
   init() {
@@ -15,20 +16,18 @@ export default createExElement({
   },
 })
 
-export interface RectangleProps extends UIElementProps {
+export interface RectangleProps extends GraphicProps {
   color?: ex.Color | string
 }
 
-export class RectangleElement extends UIElement {
+export class RectangleElement extends GraphicElement {
   constructor() {
     super()
-    this.graphics.add(
-      new Rectangle({
-        width: 1,
-        height: 1,
-        color: Color.Black,
-      }),
-    )
+    this.graphic = new Rectangle({
+      width: 1,
+      height: 1,
+      color: Color.Black,
+    })
   }
 
   private get _currentGraphic() {
