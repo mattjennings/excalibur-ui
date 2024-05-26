@@ -1,4 +1,4 @@
-import { renderUI, useEngineEvent, useValue } from 'excalibur-ui'
+import { renderUI, useEngineEvent } from 'excalibur-ui'
 import { createMemo, createSignal } from 'solid-js'
 
 export default class Dialogue extends ex.Scene {
