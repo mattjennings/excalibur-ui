@@ -54,3 +54,12 @@ describe('props', () => {
     expect(el.localBounds.height).toBe(100)
   })
 })
+
+describe('html', () => {
+  test('renders html', async ({ renderUI }) => {
+    renderUI(() => (
+      <ex-view html={() => <div data-testid="test">Hello</div>}></ex-view>
+    ))
+    expect(document.querySelector('[data-testid=test]')).toBeInTheDocument()
+  })
+})

@@ -1,4 +1,4 @@
-import { createSignal, onCleanup } from 'solid-js'
+import { SignalOptions, createSignal, onCleanup } from 'solid-js'
 import {
   Engine,
   EngineEvents,
@@ -13,7 +13,7 @@ import {
  */
 export function useValue<T>(
   getter: () => T,
-  opts: {
+  opts: SignalOptions<T> & {
     timing?:
       | 'update'
       | 'preupdate'
@@ -24,10 +24,10 @@ export function useValue<T>(
       | 'postframe'
   } = {},
 ) {
-  const { timing = 'postupdate' } = opts
+  const { timing = 'postupdate', ...signalOptions } = opts
   const engine = Engine.useEngine()
 
-  const [signal, setSignal] = createSignal<T>(getter())
+  const [signal, setSignal] = createSignal<T>(getter(), signalOptions)
   const setter = () => setSignal(() => getter())
 
   engine.on(timing, setter)

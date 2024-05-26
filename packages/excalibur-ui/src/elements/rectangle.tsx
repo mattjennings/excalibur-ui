@@ -16,7 +16,8 @@ export default createExElement({
   },
 })
 
-export interface RectangleProps extends Omit<GraphicProps, 'graphic' | 'ref'> {
+export interface RectangleProps<T extends RectangleElement = RectangleElement>
+  extends Omit<GraphicProps<T>, 'graphic'> {
   ref?: (el: RectangleElement) => void
   color?: ex.Color | string
 }

@@ -4,6 +4,7 @@ import {
   GraphicProps,
   RectangleProps,
   TextProps,
+  ViewElement,
   ViewProps,
   elements,
 } from './elements'
@@ -22,10 +23,10 @@ declare global {
   }
 }
 
-type ExElement = Entity & {
+type ExElement = ViewElement & {
   __exui?: { type: string }
 }
-type NodeType = ExElement | HTMLElement | Text
+type NodeType = ExElement | HTMLElement | Text | UIContainer
 
 const HTML_PROPERTIES = new Set(['className', 'textContent'])
 
@@ -120,7 +121,6 @@ const {
       else if (isHtmlElement(parent)) {
         parent.insertBefore(node, anchor as Node)
       } else {
-        // unsupported
         if (isExElement(parent)) {
           throw new Error('Cannot insert html element into excalibur element')
         } else {
@@ -285,7 +285,7 @@ function isScene(node: Entity | Scene): node is Scene {
 }
 
 function isExElement(node: NodeType): node is ExElement {
-  return node instanceof Entity
+  return node instanceof ViewElement || node instanceof UIContainer
 }
 
 function isHtmlElement(node: NodeType): node is HTMLElement {

@@ -15,8 +15,8 @@ export default createExElement({
   },
 })
 
-export interface GraphicProps extends Omit<ViewProps, 'ref'> {
-  ref?: (el: GraphicElement) => void
+export interface GraphicProps<T extends GraphicElement = GraphicElement>
+  extends ViewProps<T> {
   graphic: ex.Graphic
   material?: ex.Material
 }
@@ -115,12 +115,12 @@ export class GraphicElement extends ViewElement {
     return this.graphics.material
   }
 
-  htmlProps() {
+  get htmlProps() {
     if (!this.scene) return {}
 
     const screenPos = this.scene.engine.worldToScreenCoordinates(this.pos)
 
-    const superProps = super.htmlProps()
+    const superProps = super.htmlProps
 
     return {
       ...superProps,

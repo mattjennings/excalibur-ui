@@ -84,7 +84,9 @@ export const test = base.extend<{
   renderUI: async ({ scene, clock }, use) => {
     await use((ui) => {
       renderUI(scene, ui)
-      clock.step(1000)
+      // 2 steps seem to be needed to trigger 'initialize' on entities
+      clock.step()
+      clock.step()
 
       return (
         scene.entities.find((entity) => entity instanceof UIContainer)

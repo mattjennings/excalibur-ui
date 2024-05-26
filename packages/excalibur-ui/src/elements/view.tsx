@@ -1,29 +1,28 @@
 import { createExElement } from '.'
 
-import { Accessor, createSignal } from 'solid-js'
-
 import {
-  Vector,
-  PreUpdateEvent,
-  PostUpdateEvent,
-  KillEvent,
-  PreKillEvent,
-  PostKillEvent,
-  PreDrawEvent,
-  PostDrawEvent,
-  PreTransformDrawEvent,
-  PostTransformDrawEvent,
-  PreDebugDrawEvent,
-  PostDebugDrawEvent,
-  Entity,
-  TransformComponent,
-  PointerComponent,
-  EventEmitter,
   BoundingBox,
+  Entity,
   EntityEvents,
+  EventEmitter,
+  KillEvent,
+  PointerComponent,
   PointerEvent,
+  PostDebugDrawEvent,
+  PostDrawEvent,
+  PostKillEvent,
+  PostTransformDrawEvent,
+  PostUpdateEvent,
+  PreDebugDrawEvent,
+  PreDrawEvent,
+  PreKillEvent,
+  PreTransformDrawEvent,
+  PreUpdateEvent,
+  TransformComponent,
+  Vector,
 } from 'excalibur'
 import { UIContainer } from '../ui-container'
+import { createStore } from 'solid-js/store'
 
 export default createExElement({
   init() {
@@ -38,8 +37,8 @@ export default createExElement({
   },
 })
 
-export interface ViewProps {
-  ref?: (el: ViewElement) => void
+export interface ViewProps<T extends ViewElement = ViewElement> {
+  ref?: (el: T) => void
   pos?: Vector
   x?: number
   y?: number
@@ -58,7 +57,18 @@ export interface ViewProps {
    */
   useChildBounds?: boolean
 
-  html?: (props: Accessor<Record<string, any>>) => HTMLElement
+  /**
+   * Intended for accessibility, render an HTML element representing this view.
+   *
+   * Props are provided to position this element according to the view's position on the canvas.
+   *
+   * example: `html={(props) => <span style={props.style}>Label</span>}`
+   */
+  html?: (
+    props: Record<string, any> & {
+      style: Record<string, string>
+    },
+  ) => HTMLElement
 
   onPreUpdate?: (ev: PreUpdateEvent) => void
   onPostUpdate?: (ev: PostUpdateEvent) => void
@@ -96,7 +106,11 @@ export class ViewElement extends Entity {
 
   declare events: EventEmitter
 
-  uiContainer?: UIContainer
+  private _uiContainer?: UIContainer
+
+  private _htmlElement: HTMLElement | null = null
+  private _htmlProps: Record<string, any>
+  private _setHtmlProps: (props: Record<string, any>) => void
 
   constructor() {
     super()
@@ -106,9 +120,22 @@ export class ViewElement extends Entity {
     this.addComponent(this._transform)
     this.addComponent(this._pointer)
 
+    const [htmlProps, setHtmlProps] = createStore<Record<string, any>>({
+      style: {
+        position: 'absolute',
+        left: '0',
+        top: '0',
+        width: '0',
+        height: '0',
+      },
+    })
+
+    this._htmlProps = htmlProps
+    this._setHtmlProps = setHtmlProps
+
     this.on('predraw', () => {
-      if (this.isInitialized) {
-        this._updateHtml()
+      if (this.isInitialized && this._htmlElement) {
+        this._setHtmlProps(this.htmlProps)
       }
     })
 
@@ -218,39 +245,36 @@ export class ViewElement extends Entity {
     this.transform.rotation = value
   }
 
-  private _htmlElement: HTMLElement | null = null
-  private _htmlPropsSignal = createSignal(
-    {},
-    {
-      // terrible idea, but probably still faster than
-      // updating DOM element every frame
-      // best solution would be to update style attributes narrowly with signals
-      equals(prev, next) {
-        return JSON.stringify(prev) === JSON.stringify(next)
-      },
-    },
-  )
-
-  set html(node: (props: any) => HTMLElement) {
-    this._htmlElement = node(this._htmlPropsSignal[0])
+  get uiContainer(): UIContainer | undefined {
+    return this._uiContainer
   }
 
-  private _updateHtml() {
-    if (!this.uiContainer) return
+  set uiContainer(value: UIContainer) {
+    this._uiContainer = value
 
-    if (this._htmlElement && !this._htmlElement?.parentNode) {
+    if (this._htmlElement) {
+      value.htmlElement.appendChild(this._htmlElement)
+    }
+  }
+
+  set html(node: (props: any) => HTMLElement) {
+    if (this._htmlElement) {
+      this._htmlElement.remove()
+    }
+    this._htmlElement = node(this._htmlProps)
+
+    if (this.uiContainer) {
       this.uiContainer.htmlElement.appendChild(this._htmlElement)
     }
-
-    this._htmlPropsSignal[1](this.htmlProps())
   }
 
   toCssPx(value: number) {
     return `calc(${value} * var(--px))`
   }
 
-  htmlProps() {
+  get htmlProps() {
     if (!this.scene) return {}
+    if (!this._htmlElement) return {}
 
     const screenPos = this.scene.engine.worldToScreenCoordinates(this.pos)
 

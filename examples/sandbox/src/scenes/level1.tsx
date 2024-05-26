@@ -44,21 +44,14 @@ class Player extends ex.Actor {
 
       return (
         <>
-          <ex-view pos={ex.vec(100, 100)}>
-            <ex-graphic
-              width={800}
-              graphic={new ex.Circle({ radius: 5, color: ex.Color.Red })}
-            />
-          </ex-view>
-          {/* <button>i'm a normal button</button>
           <ex-rectangle
             html={(props) => (
               <button
                 style={{
-                  ...props().style,
+                  ...props.style,
                   background: 'none',
                   border: 'none',
-                  pointer: 'cursor',
+                  cursor: 'pointer',
                 }}
                 onClick={() => alert('clicked')}
               ></button>
@@ -90,7 +83,7 @@ class Player extends ex.Actor {
               size: 20,
               family: 'Arial',
             }}
-          /> */}
+          />
         </>
       )
     })
