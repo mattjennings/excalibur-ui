@@ -1,5 +1,13 @@
 /// <reference types="expect-dom/vitest.d.ts" />
-import * as matchers from 'expect-dom'
+import * as domMatchers from 'expect-dom'
+import * as customMatchers from './matchers'
 import { expect } from 'vitest'
 
-expect.extend(matchers)
+expect.extend(domMatchers)
+expect.extend(customMatchers)
+
+declare module 'vitest' {
+  interface JestAssertion<T = any> {
+    toMatchScreenshot: (name: string, threshold?: number) => Promise<T>
+  }
+}

@@ -1,7 +1,10 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
-import type { Browser, LaunchOptions } from 'playwright'
+import type { Browser, LaunchOptions, Page } from 'playwright'
 import solidPlugin from 'vite-plugin-solid'
+import path from 'path'
+import fs from 'fs'
+import looksSame from 'looks-same'
 
 interface BrowserProviderOptions {
   launch?: LaunchOptions
@@ -44,6 +47,92 @@ export default defineConfig({
           devtools: true,
         },
       } as BrowserProviderOptions,
+      commands: {
+        async expectToMatchScreenshot(context, name, threshold = 0.1) {
+          if (context.provider.name !== 'playwright')
+            throw new Error('Not implemented for provider')
+
+          if (!context.testPath) {
+            throw new Error('testPath not found')
+          }
+
+          const page = (context.provider as any).page as Page
+
+          const folder = path.dirname(context.testPath)
+
+          const snapshotsFolder = path.join(folder, '__snapshots__')
+
+          if (!fs.existsSync(snapshotsFolder)) {
+            fs.mkdirSync(snapshotsFolder)
+          }
+
+          const testName = slugify(
+            path.basename(context.testPath).split('.')[0],
+          )
+
+          const screenshotFileName = slugify(testName + '_' + name)
+          const screenshotPath = path.join(
+            snapshotsFolder,
+            `${screenshotFileName}.png`,
+          )
+
+          const prev = await fs.promises.readFile(screenshotPath).catch((e) => {
+            if (e.code === 'ENOENT') return null
+            throw e
+          })
+
+          const iframe = await page.$('[id=vitest-tester] iframe')
+
+          const next = await iframe!.screenshot()
+
+          // if prev doesnt exist just compare against itself for consistent return data
+          const result = await looksSame(prev ?? next, next, {
+            ignoreAntialiasing: true,
+            antialiasingTolerance: 3,
+            pixelRatio: 1,
+            tolerance: threshold,
+          })
+
+          if (!result.equal && prev) {
+            const buffer = await looksSame.createDiff({
+              current: next,
+              reference: prev,
+              tolerance: threshold,
+              highlightColor: '#ff0000',
+            })
+
+            const diffPath = path.join(
+              snapshotsFolder,
+              `${screenshotFileName}.diff.png`,
+            )
+            const actualPath = path.join(
+              snapshotsFolder,
+              `${screenshotFileName}.actual.png`,
+            )
+            await fs.promises.writeFile(diffPath, buffer, 'utf-8')
+            await fs.promises.writeFile(actualPath, next)
+          } else {
+            await fs.promises.writeFile(screenshotPath, next)
+          }
+
+          return { ...result, hadPrev: !!prev }
+        },
+      },
     },
   },
 })
+
+function slugify(str: string) {
+  return str.toLowerCase().replace(/\s/g, '-')
+}
+
+declare module '@vitest/browser/context' {
+  interface BrowserCommands {
+    screenshot: (name: string) => Promise<number[]>
+    resizePage: (width: number, height: number) => Promise<void>
+    expectToMatchScreenshot: (
+      name: string,
+      threshold?: number,
+    ) => Promise<looksSame.LooksSameBaseResult & { hadPrev?: boolean }>
+  }
+}

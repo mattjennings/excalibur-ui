@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+**/__snapshots__/**/*.diff.*
+**/__snapshots__/**/*.actual.*

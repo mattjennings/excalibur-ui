@@ -3,6 +3,7 @@ import { test as base } from 'vitest'
 import { WebAudio } from 'excalibur'
 import * as ex from 'excalibur'
 import { renderUI } from '../src/runtime'
+import { commands } from '@vitest/browser/context'
 
 // @ts-ignore - suppress audio warning
 WebAudio._UNLOCKED = true
@@ -26,24 +27,14 @@ export const test = base.extend<{
     // only make the game once
     if (!game) {
       game = new ex.Engine<string>({
-        uvPadding: 0.5,
+        // uvPadding: 0.5,
         fixedUpdateFps: 60,
         resolution: {
-          height: ex.Resolution.SNES.height,
-          // make 16:9
-          width: (ex.Resolution.SNES.width / 9) * 16,
+          height: 800,
+          width: 800,
         },
-        displayMode: ex.DisplayMode.FitScreen,
-        physics: {
-          gravity: ex.vec(0, 800),
-          solver: ex.SolverStrategy.Arcade,
-          arcade: {
-            contactSolveBias: ex.ContactSolveBias.VerticalFirst,
-          },
-          colliders: {
-            compositeStrategy: 'separate',
-          },
-        },
+        displayMode: ex.DisplayMode.FillScreen,
+        pixelRatio: 1,
         pixelArt: true,
         suppressConsoleBootMessage: true,
         suppressPlayButton: true,

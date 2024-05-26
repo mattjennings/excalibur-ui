@@ -39,19 +39,18 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "expect-dom": "file:../expect-dom",
     "@adobe/css-tools": "^4.3.3",
     "@types/node": "^20.12.12",
-    "@vitest/browser": "^1.6.0",
-    "aria-query": "^5.3.0",
+    "@vitest/browser": "2.0.0-beta.3",
     "excalibur": "^0.29.3",
+    "expect-dom": "file:../expect-dom",
     "jsdom": "^24.0.0",
+    "looks-same": "^9.0.0",
     "playwright": "^1.44.1",
-    "redent": "^4.0.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vite-plugin-solid": "^2.10.2",
-    "vitest": "^1.6.0"
+    "vitest": "2.0.0-beta.3"
   },
   "dependencies": {
     "solid-js": ">=1.8"
