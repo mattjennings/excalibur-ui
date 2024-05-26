@@ -24,7 +24,8 @@ export default createExElement({
   },
 })
 
-export interface TextProps extends GraphicProps {
+export interface TextProps extends Omit<GraphicProps, 'graphic' | 'ref'> {
+  ref?: (el: TextElement) => void
   text?: string
   color?: Color | string
   font?: Font | SpriteFont | (FontOptions & GraphicOptions & RasterOptions)

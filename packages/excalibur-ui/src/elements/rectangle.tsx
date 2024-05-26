@@ -16,7 +16,8 @@ export default createExElement({
   },
 })
 
-export interface RectangleProps extends GraphicProps {
+export interface RectangleProps extends Omit<GraphicProps, 'graphic' | 'ref'> {
+  ref?: (el: RectangleElement) => void
   color?: ex.Color | string
 }
 
@@ -30,17 +31,22 @@ export class RectangleElement extends GraphicElement {
     })
   }
 
-  private get _currentGraphic() {
+  get graphic() {
     return this.graphics.current as ex.Rectangle
   }
 
+  set graphic(value: ex.Rectangle) {
+    super.graphic = value
+    console.log(this.localBounds)
+  }
+
   get color(): ex.Color | undefined {
-    return this._currentGraphic?.color
+    return this.graphic.color
   }
 
   set color(value: RectangleProps['color']) {
     if (value) {
-      this._currentGraphic.color =
+      this.graphic.color =
         typeof value === 'string' ? Color.fromHex(value as string) : value
     }
   }

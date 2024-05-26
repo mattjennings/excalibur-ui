@@ -7,5 +7,6 @@
       "$fixture": ["../test-utils/fixture.ts"],
       "excalibur-ui": ["../src/index.tsx"]
     }
-  }
+  },
+  "include": ["../src", "../tests", "../test-utils"]
 }

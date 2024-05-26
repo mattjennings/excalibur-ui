@@ -92,7 +92,6 @@ export class ViewElement extends Entity {
   private _transform!: TransformComponent
   private _pointer!: PointerComponent
 
-  private _useChildBounds = true
   private _localBounds: BoundingBox = new BoundingBox(0, 0, 0, 0)
 
   declare events: EventEmitter
@@ -102,8 +101,8 @@ export class ViewElement extends Entity {
   constructor() {
     super()
     this._transform = new TransformComponent()
-
     this._pointer = new PointerComponent()
+
     this.addComponent(this._transform)
     this.addComponent(this._pointer)
 
@@ -121,12 +120,6 @@ export class ViewElement extends Entity {
           break
         }
         parent = parent.parent
-      }
-    })
-
-    this.childrenAdded$.subscribe(() => {
-      if (this.useChildBounds) {
-        this.calculateBounds()
       }
     })
   }
@@ -164,7 +157,8 @@ export class ViewElement extends Entity {
   }
 
   set width(value: number) {
-    this.localBounds = new BoundingBox(0, 0, value, this.height)
+    const height = this.localBounds.height
+    this.localBounds = new BoundingBox(0, 0, value, height)
   }
 
   get height() {
@@ -172,7 +166,8 @@ export class ViewElement extends Entity {
   }
 
   set height(value: number) {
-    this.localBounds = new BoundingBox(0, 0, this.width, value)
+    const width = this.localBounds.width
+    this.localBounds = new BoundingBox(0, 0, width, value)
   }
 
   get pos() {
@@ -267,39 +262,6 @@ export class ViewElement extends Entity {
         width: this.toCssPx(this.width),
         height: this.toCssPx(this.height),
       },
-    }
-  }
-
-  get useChildBounds() {
-    return this._useChildBounds
-  }
-
-  set useChildBounds(value: boolean) {
-    this._useChildBounds = value
-    if (value) {
-      this.calculateBounds()
-    }
-  }
-
-  private calculateBounds() {
-    if (this.useChildBounds) {
-      let maxWidth = this.localBounds.width
-      let maxHeight = this.localBounds.height
-
-      for (const child of this.children) {
-        if (child instanceof ViewElement) {
-          const bounds = child.localBounds
-          if (bounds.width > maxWidth) {
-            maxWidth = bounds.width
-          }
-
-          if (bounds.height > maxHeight) {
-            maxHeight = bounds.height
-          }
-        }
-      }
-
-      this.localBounds = new BoundingBox(0, 0, maxWidth, maxHeight)
     }
   }
 }

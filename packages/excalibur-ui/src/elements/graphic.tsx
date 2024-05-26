@@ -23,8 +23,8 @@ export interface GraphicProps extends Omit<ViewProps, 'ref'> {
 export class GraphicElement extends ViewElement {
   private _graphics!: GraphicsComponent
 
-  private _width = 0
-  private _height = 0
+  private _width: number | undefined
+  private _height: number | undefined
 
   constructor() {
     super()
@@ -58,17 +58,26 @@ export class GraphicElement extends ViewElement {
       this.graphics.add('default', value)
 
       // if width/height has been set, apply it to the graphic
-      if (this._width) {
+      if (typeof this._width === 'number') {
         value.width = this._width
       }
 
-      if (this._height) {
+      if (typeof this._height === 'number') {
         value.height = this._height
       }
+
       this.localBounds = new BoundingBox(0, 0, value.width, value.height)
     } else {
       this.localBounds = new BoundingBox(0, 0, 0, 0)
     }
+  }
+
+  get height() {
+    return super.height
+  }
+
+  get width() {
+    return super.width
   }
 
   set width(value: number) {
@@ -103,12 +112,18 @@ export class GraphicElement extends ViewElement {
     const screenPos = this.scene.engine.worldToScreenCoordinates(this.pos)
 
     const superProps = super.htmlProps()
+
     return {
       ...superProps,
       style: {
         ...superProps.style,
-        left: this.toCssPx(screenPos.x - this.width * this.anchor.x),
-        top: this.toCssPx(screenPos.y - this.height * this.anchor.y),
+
+        left: this.toCssPx(
+          screenPos.x - this.localBounds.width * this.anchor.x,
+        ),
+        top: this.toCssPx(
+          screenPos.y - this.localBounds.height * this.anchor.y,
+        ),
       },
     }
   }
