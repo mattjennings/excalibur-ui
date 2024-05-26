@@ -18,6 +18,7 @@ export default createExElement({
 export interface GraphicProps extends Omit<ViewProps, 'ref'> {
   ref?: (el: GraphicElement) => void
   graphic: ex.Graphic
+  material?: ex.Material
 }
 
 export class GraphicElement extends ViewElement {
@@ -104,6 +105,14 @@ export class GraphicElement extends ViewElement {
   set opacity(value: number) {
     if (!this.graphics.current) return
     this.graphics.current.opacity = value
+  }
+
+  set material(value: ex.Material | null | undefined) {
+    this.graphics.material = value ?? null
+  }
+
+  get material(): ex.Material | null {
+    return this.graphics.material
   }
 
   htmlProps() {
