@@ -168,6 +168,8 @@ class Actor extends ex.Actor {
 
 There's a lot missing here, but currently you can use:
 
+- `ex-view`
+- `ex-graphic`
 - `ex-text`
 - `ex-rectangle`
 
@@ -178,7 +180,10 @@ class Scene extends ex.Scene {
   onInitialize() {
     renderUI(this, () => {
       return (
-        <>
+        <ex-view pos={ex.vec(100, 100)}>
+          <ex-graphic
+            graphic={new ex.Circle({ radius: 5, color: ex.Color.Red })}
+          />
           <ex-text
             text="Hello World!"
             pos={ex.vec(100, 100)}
@@ -194,7 +199,7 @@ class Scene extends ex.Scene {
             width={140}
             height={80}
           />
-        </>
+        </ex-view>
       )
     })
   }

@@ -47,13 +47,7 @@ class Player extends ex.Actor {
           <ex-view pos={ex.vec(100, 100)}>
             <ex-graphic
               width={800}
-              graphic={
-                new ex.Rectangle({
-                  width: 100,
-                  height: 100,
-                  color: ex.Color.Cyan,
-                })
-              }
+              graphic={new ex.Circle({ radius: 5, color: ex.Color.Red })}
             />
           </ex-view>
           {/* <button>i'm a normal button</button>
