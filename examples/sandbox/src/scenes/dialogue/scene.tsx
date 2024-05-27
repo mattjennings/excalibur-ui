@@ -1,4 +1,4 @@
-import { renderUI, useEngineEvent } from 'excalibur-ui'
+import { renderUI, useEngineEvent, useSceneEvent } from 'excalibur-ui'
 import { createMemo, createSignal } from 'solid-js'
 
 export default class Dialogue extends ex.Scene {
@@ -70,7 +70,7 @@ function useTypewriter(initialValue: string, charactersPerSecond = 50) {
   const [text, setText] = createSignal(initialValue)
   const [progress, setProgress] = createSignal(0)
 
-  useEngineEvent('preupdate', ({ delta }) => {
+  useSceneEvent('preupdate', ({ delta }) => {
     const characters = text().length
     setProgress((prev) =>
       Math.min(1, prev + (charactersPerSecond / characters) * (delta / 1000)),
