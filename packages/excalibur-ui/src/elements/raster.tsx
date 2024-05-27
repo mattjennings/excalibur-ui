@@ -3,7 +3,7 @@ import { GraphicElement, GraphicProps } from './graphic'
 
 export interface RasterProps<T extends RasterElement = RasterElement>
   extends GraphicProps<T> {
-  color?: ex.Raster['color']
+  color?: ex.Raster['color'] | string
   strokeColor?: ex.Raster['strokeColor']
   lineCap?: ex.Raster['lineCap']
   lineDash?: ex.Raster['lineDash']

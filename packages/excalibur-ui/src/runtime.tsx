@@ -237,6 +237,17 @@ function renderUI<T extends Scene | Entity>(
     }
   })
 
+  scene.on('activate', () => {
+    setup()
+  })
+
+  scene.on('deactivate', () => {
+    if (container) {
+      container.kill()
+    }
+    setDidRender(false)
+  })
+
   const setup = () => {
     container = new UIContainer(options?.html)
     scene.add(container)
@@ -246,25 +257,10 @@ function renderUI<T extends Scene | Entity>(
     const isCurrentScene = sceneOrEntity === sceneOrEntity.engine.currentScene
     if (isCurrentScene && scene.isInitialized) {
       setup()
-    } else {
-      scene.on('activate', () => {
-        setup()
-      })
     }
-
-    scene.on('deactivate', () => {
-      if (container) {
-        container.kill()
-      }
-      setDidRender(false)
-    })
   } else if (isEntity(sceneOrEntity)) {
     if (sceneOrEntity.isInitialized) {
       setup()
-    } else {
-      sceneOrEntity.on('initialize', () => {
-        setup()
-      })
     }
 
     sceneOrEntity.on('kill', () => {

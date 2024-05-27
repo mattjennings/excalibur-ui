@@ -50,7 +50,6 @@ export class UIContainer extends Entity {
     }
 
     this.parentElement = parent
-    this.parentElement.appendChild(this.htmlElement)
 
     this.transform = new TransformComponent()
     this.graphics = new GraphicsComponent()
@@ -70,18 +69,17 @@ export class UIContainer extends Entity {
     }
   }
 
+  kill() {
+    this.parentElement.removeChild(this.htmlElement)
+    this.htmlElement.remove()
+    this.resizeObserver?.disconnect()
+    super.kill()
+  }
+
   onInitialize(engine: Engine): void {
     this.engine = engine
+    this.parentElement.appendChild(this.htmlElement)
     this.resizeToCanvas()
-    this.engine.currentScene.on('activate', () => {
-      if (!this.htmlElement.parentElement) {
-        this.parentElement.appendChild(this.htmlElement)
-      }
-    })
-
-    this.engine.currentScene.on('deactivate', () => {
-      this.htmlElement.parentElement?.removeChild(this.htmlElement)
-    })
   }
 
   resizeToCanvas = () => {
@@ -113,10 +111,5 @@ export class UIContainer extends Entity {
         this.htmlElement.style.setProperty('--px', `${scaledWidth}px`)
       }
     }
-  }
-
-  onPreKill() {
-    this.htmlElement.remove()
-    this.resizeObserver?.disconnect()
   }
 }
