@@ -156,12 +156,15 @@ const {
         throw new Error('Unknown parent type')
       }
     } else if (isExElement(node)) {
+      node.kill()
+
       if (isExElement(parent)) {
-        node.kill()
         parent.removeChild(node)
       } else {
         throw new Error('Unknown parent type')
       }
+    } else {
+      throw new Error('Unknown node type')
     }
   },
   getParentNode(node) {

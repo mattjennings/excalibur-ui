@@ -118,7 +118,7 @@ export class GraphicElement extends ViewElement {
   get htmlProps() {
     if (!this.scene) return {}
 
-    const screenPos = this.scene.engine.worldToScreenCoordinates(this.pos)
+    const screenPos = this.scene.engine.worldToScreenCoordinates(this.globalPos)
 
     const superProps = super.htmlProps
 

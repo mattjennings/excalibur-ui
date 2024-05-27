@@ -23,6 +23,7 @@ import {
 } from 'excalibur'
 import { UIContainer } from '../ui-container'
 import { createStore } from 'solid-js/store'
+import { JSXElement } from 'solid-js'
 
 export default createExElement({
   init() {
@@ -43,6 +44,8 @@ export interface ViewProps<T extends ViewElement = ViewElement> {
   x?: number
   y?: number
   z?: number
+
+  children?: JSXElement
 
   width?: number
   height?: number
@@ -154,6 +157,15 @@ export class ViewElement extends Entity {
   kill() {
     this.events.emit('prekill')
     this.onPreKill?.()
+
+    if (this._htmlElement) {
+      this._htmlElement.remove()
+    }
+
+    for (const child of [...this.children]) {
+      child.kill()
+    }
+
     super.kill()
     this.events.emit('postkill')
     this.onPostKill?.()
@@ -199,6 +211,10 @@ export class ViewElement extends Entity {
 
   get pos() {
     return this.transform.pos
+  }
+
+  get globalPos() {
+    return this.transform.globalPos
   }
 
   set pos(value: Vector) {
@@ -276,7 +292,7 @@ export class ViewElement extends Entity {
     if (!this.scene) return {}
     if (!this._htmlElement) return {}
 
-    const screenPos = this.scene.engine.worldToScreenCoordinates(this.pos)
+    const screenPos = this.scene.engine.worldToScreenCoordinates(this.globalPos)
 
     return {
       style: {

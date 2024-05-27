@@ -7,3 +7,9 @@ body {
   height: 100vh;
   background: black;
 }
+
+.invisible {
+  background: none;
+  border: none;
+  color: transparent;  
+}

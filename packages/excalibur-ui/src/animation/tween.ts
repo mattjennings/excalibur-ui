@@ -33,10 +33,12 @@ export function useTweenedValue(
     if (options.duration) setDuration(options.duration)
     if (options.easing) setEasing(() => options.easing!)
 
-    setStart(value())
-    setTarget(v)
-    setElapsed(0)
-    onStart?.()
+    if (v !== target()) {
+      setStart(value())
+      setTarget(v)
+      setElapsed(0)
+      onStart?.()
+    }
   }
 
   useSceneEvent('postupdate', ({ delta }) => {

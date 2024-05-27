@@ -1,6 +1,6 @@
 import { renderUI, useTweenedValue } from 'excalibur-ui'
 
-export default class Dialogue extends ex.Scene {
+export default class Tween extends ex.Scene {
   onInitialize() {
     renderUI(this, () => <UI />)
   }
