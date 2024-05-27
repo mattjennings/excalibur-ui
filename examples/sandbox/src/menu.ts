@@ -7,23 +7,31 @@ export function createMenu() {
   const query = url.searchParams
   for (const name of Object.keys(scenes)) {
     const li = document.createElement('li')
-    const a = document.createElement('a')
+    const sceneLink = document.createElement('a')
+    const codeLink = document.createElement('a')
 
-    a.href = `?scene=${name}`
-    a.textContent = name
+    li.appendChild(sceneLink)
+    li.appendChild(codeLink)
+
+    codeLink.href = `https://github.com/mattjennings/excalibur-ui/blob/main/examples/sandbox/src/scenes/${name}/scene.tsx`
+    codeLink.textContent = 'view code'
+    codeLink.target = '_blank'
+    codeLink.rel = 'noopener noreferrer'
+
+    sceneLink.href = `?scene=${name}`
+    sceneLink.textContent = name
     if (query.get('scene') === name) {
-      a.classList.add('active')
+      sceneLink.classList.add('active')
     }
-    li.appendChild(a)
     sceneList.appendChild(li)
 
-    a.onclick = (e) => {
+    sceneLink.onclick = (e) => {
       e.preventDefault()
       window.history.pushState({}, '', `?scene=${name}`)
 
       const prevActive = document.querySelector('.active')
       prevActive?.classList.remove('active')
-      a.classList.add('active')
+      sceneLink.classList.add('active')
     }
   }
 }
