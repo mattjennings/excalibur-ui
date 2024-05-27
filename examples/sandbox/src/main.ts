@@ -1,9 +1,6 @@
 import './style.css'
 import { createMenu } from './menu'
 
-const query = new URLSearchParams(window.location.search)
-const INITIAL_SCENE = query.get('scene') || 'test'
-
 // load all scenes from ./scenes directory where folder name is the scene name
 // and the scene file is named `scene.tsx`
 const sceneFiles = import.meta.glob('./scenes/**/*/scene.tsx', {
@@ -36,6 +33,13 @@ export const scenes = Object.entries(sceneFiles).reduce((acc, [key, scene]) => {
   }
 }, {})
 
+const query = new URLSearchParams(window.location.search)
+const initialScene = query.get('scene') || Object.keys(scenes)[0]
+
+if (!query.has('scene')) {
+  window.history.pushState({}, '', `?scene=${initialScene}`)
+}
+
 const game = new ex.Engine<string>({
   width: 800,
   height: 600,
@@ -45,7 +49,7 @@ const game = new ex.Engine<string>({
   scenes,
 })
 
-game.start(INITIAL_SCENE, {
+game.start(initialScene, {
   inTransition: new ex.FadeInOut({
     duration: 200,
     direction: 'in',
