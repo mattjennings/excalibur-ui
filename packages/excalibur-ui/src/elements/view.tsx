@@ -1,5 +1,13 @@
 import { createExElement } from '.'
-
+import Yoga, {
+  Display,
+  FlexDirection,
+  PositionType,
+  Node,
+  Align,
+  Wrap,
+  Justify,
+} from 'yoga-layout'
 import {
   BoundingBox,
   Entity,
@@ -38,6 +46,18 @@ export default createExElement({
   },
 })
 
+export interface StyleProps {
+  position?: PositionType
+  flex?: Display
+  flexDirection?: FlexDirection
+  flexWrap?: Wrap
+  alignItems?: Align
+  justifyContent?: Justify
+  gap?: number
+  width?: number
+  height?: number
+}
+
 export interface ViewProps<T extends ViewElement = ViewElement> {
   ref?: (el: T) => void
   pos?: Vector
@@ -55,6 +75,7 @@ export interface ViewProps<T extends ViewElement = ViewElement> {
   scale?: Vector
   rotation?: number
 
+  style?: StyleProps
   /**
    * If true, the element will use the bounds of its children to calculate its own bounds.
    */
@@ -115,6 +136,8 @@ export class ViewElement extends Entity {
   private _htmlProps: Record<string, any>
   private _setHtmlProps: (props: Record<string, any>) => void
 
+  yogaNode: Node
+
   constructor() {
     super()
     this._transform = new TransformComponent()
@@ -136,6 +159,8 @@ export class ViewElement extends Entity {
     this._htmlProps = htmlProps
     this._setHtmlProps = setHtmlProps
 
+    this.yogaNode = Yoga.Node.create()
+
     this.on('predraw', () => {
       if (this.isInitialized && this._htmlElement) {
         this._setHtmlProps(this.htmlProps)
@@ -144,6 +169,7 @@ export class ViewElement extends Entity {
 
     this.on('initialize', () => {
       let parent = this.parent
+
       while (parent) {
         if (parent instanceof UIContainer) {
           this.uiContainer = parent
@@ -158,9 +184,8 @@ export class ViewElement extends Entity {
     this.events.emit('prekill')
     this.onPreKill?.()
 
-    if (this._htmlElement) {
-      this._htmlElement.remove()
-    }
+    this._htmlElement?.remove()
+    this.yogaNode.free()
 
     for (const child of [...this.children]) {
       child.kill()
@@ -173,6 +198,15 @@ export class ViewElement extends Entity {
 
   onPreKill() {}
   onPostKill() {}
+
+  addChild(entity: Entity<any>): Entity<any> {
+    super.addChild(entity)
+    if (entity instanceof ViewElement && entity.yogaNode) {
+      this.yogaNode.insertChild(entity.yogaNode, this.yogaNode.getChildCount())
+      this.applyStyles()
+    }
+    return entity
+  }
 
   get transform() {
     return this._transform
@@ -302,6 +336,75 @@ export class ViewElement extends Entity {
         width: this.toCssPx(this.width),
         height: this.toCssPx(this.height),
       },
+    }
+  }
+
+  get style(): StyleProps {
+    return {
+      flex: this.yogaNode.getDisplay(),
+      position: this.yogaNode.getPositionType(),
+      flexDirection: this.yogaNode.getFlexDirection(),
+      width: this.width,
+      height: this.height,
+    }
+  }
+
+  set style(value: StyleProps) {
+    if (value.gap) {
+      this.yogaNode.setGap(Yoga.GUTTER_ALL, value.gap)
+    }
+
+    if (value.alignItems) {
+      this.yogaNode.setAlignItems(value.alignItems)
+    }
+
+    if (value.justifyContent) {
+      this.yogaNode.setJustifyContent(value.justifyContent)
+    }
+
+    if (value.flexWrap) {
+      this.yogaNode.setFlexWrap(value.flexWrap)
+    }
+
+    if (value.width) {
+      this.yogaNode.setWidth(value.width)
+    }
+
+    if (value.height) {
+      this.yogaNode.setHeight(value.height)
+    }
+
+    if (value.flex) {
+      this.yogaNode.setDisplay(value.flex)
+    }
+
+    if (value.position) {
+      this.yogaNode.setPositionType(value.position)
+    }
+
+    if (value.flexDirection) {
+      this.yogaNode.setFlexDirection(value.flexDirection)
+    }
+
+    this.applyStyles()
+  }
+
+  applyStyles() {
+    // todo: optimize
+    const apply = () => {
+      this.width = this.yogaNode.getWidth().value
+      this.height = this.yogaNode.getHeight().value
+      this.pos.x = this.yogaNode.getComputedLeft()
+      this.pos.y = this.yogaNode.getComputedTop()
+    }
+    if (this.uiContainer) {
+      this.uiContainer.calculateLayout()
+      apply()
+    } else {
+      this.once('initialize', () => {
+        this.uiContainer?.calculateLayout()
+        apply()
+      })
     }
   }
 }

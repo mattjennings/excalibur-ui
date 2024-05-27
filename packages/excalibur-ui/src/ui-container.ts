@@ -5,6 +5,8 @@ import {
   GraphicsComponent,
   Vector,
 } from 'excalibur'
+import Yoga, { Node } from 'yoga-layout'
+import { ViewElement } from './elements'
 
 /**
  * When 'native' the UI will be sized to the actual "css" pixels of the canvas.
@@ -28,6 +30,8 @@ export class UIContainer extends Entity {
   transform: TransformComponent
   graphics: GraphicsComponent
 
+  yogaNode: Node
+
   constructor({
     tag = 'div',
     id,
@@ -49,6 +53,7 @@ export class UIContainer extends Entity {
       this.htmlElement.id = id
     }
 
+    this.yogaNode = Yoga.Node.create()
     this.parentElement = parent
 
     this.transform = new TransformComponent()
@@ -111,5 +116,38 @@ export class UIContainer extends Entity {
         this.htmlElement.style.setProperty('--px', `${scaledWidth}px`)
       }
     }
+  }
+
+  addChild(entity: Entity<any>): Entity<any> {
+    super.addChild(entity)
+
+    if (entity instanceof ViewElement) {
+      this.yogaNode.insertChild(entity.yogaNode, this.yogaNode.getChildCount())
+    }
+
+    this.calculateLayout()
+    return entity
+  }
+
+  calculateLayout(node = this.yogaNode) {
+    if (!node.hasNewLayout()) {
+      return
+    }
+
+    node.markLayoutSeen()
+
+    node.calculateLayout(
+      this.engine.canvasWidth,
+      this.engine.canvasHeight,
+      Yoga.DIRECTION_LTR,
+    )
+
+    for (let i = 0; i < node.getChildCount(); i++) {
+      this.calculateLayout(node.getChild(i))
+    }
+
+    const left = node.getComputedLeft()
+    const top = node.getComputedTop()
+    console.log('left', left, 'top', top)
   }
 }

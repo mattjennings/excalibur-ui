@@ -4,10 +4,15 @@ import solidPlugin from 'vite-plugin-solid'
 
 export default defineConfig({
   base: process.env.CI ? 'excalibur-ui' : '',
+
+  build: {
+    target: 'esnext',
+  },
   optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext',
+    },
     force: true,
-    // only necessary if running local build of excalibur-ui. if installed from npm, remove this
-    // exclude: ['excalibur-ui',],
   },
   resolve: {
     dedupe: ['solid-js', 'excalibur-ui'],
