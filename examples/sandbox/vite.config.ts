@@ -3,7 +3,7 @@ import { default as AutoImport } from 'unplugin-auto-import/vite'
 import solidPlugin from 'vite-plugin-solid'
 
 export default defineConfig({
-  server: {},
+  base: process.env.CI ? 'excalibur-ui' : '',
   optimizeDeps: {
     force: true,
     // only necessary if running local build of excalibur-ui. if installed from npm, remove this
