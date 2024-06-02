@@ -8,5 +8,5 @@
       "excalibur-ui": ["../src/index.tsx"]
     }
   },
-  "include": ["../src", "../tests", "../test-utils"]
+  "include": ["../src", "../tests", "../test-utils", "../vitest.config.ts"]
 }

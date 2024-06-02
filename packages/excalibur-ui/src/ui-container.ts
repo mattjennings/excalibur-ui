@@ -7,6 +7,7 @@ import {
 } from 'excalibur'
 import { JSXElement } from 'solid-js'
 import { render } from './runtime'
+import { ViewElement } from './elements'
 
 /**
  * When 'native' the UI will be sized to the actual "css" pixels of the canvas.
@@ -89,14 +90,10 @@ export class UIContainer extends Entity {
     this.parentElement.appendChild(this.htmlElement)
     this.resizeToCanvas()
 
-    let didRender = false
     const scene = this.scene!
 
-    scene.on('predraw', () => {
-      if (!didRender) {
-        didRender = true
-        render(this.ui as any, this)
-      }
+    scene.once('predraw', () => {
+      render(this.ui as any, this)
     })
 
     scene.on('activate', () => {
@@ -145,5 +142,9 @@ export class UIContainer extends Entity {
         this.htmlElement.style.setProperty('--px', `${scaledWidth}px`)
       }
     }
+  }
+
+  get children(): ViewElement[] {
+    return super.children as ViewElement[]
   }
 }

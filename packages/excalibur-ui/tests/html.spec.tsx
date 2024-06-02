@@ -7,8 +7,18 @@ beforeEach(async ({ useNewScene }) => {
 
 describe('creating and updating elements', () => {
   test('renders html', async ({ renderUI }) => {
-    renderUI(() => <div data-testid="test">hello</div>)
+    renderUI(() => <div data-testid="test">hellooo</div>)
     expect(document.querySelector('[data-testid=test]')).toBeInTheDocument()
+  })
+
+  test('removes html on kill', async ({ renderUI, scene, clock }) => {
+    const container = renderUI(() => <div data-testid="test">hello</div>)
+    expect(scene.entities.length).toBe(1)
+    expect(document.querySelector('[data-testid=test]')).toBeInTheDocument()
+    container.kill()
+    clock.step()
+    expect(scene.entities.length).toBe(0)
+    expect(document.querySelector('[data-testid=test]')).not.toBeInTheDocument()
   })
 
   test('applies styles', async ({ renderUI }) => {

@@ -19,13 +19,14 @@ export default defineConfig({
     alias: {
       '$test-utils': '/test-utils',
       $fixture: '/test-utils/fixture.ts',
+      'excalibur-ui/runtime': '/src/runtime.tsx',
       'excalibur-ui': '/src/index.tsx',
     },
   },
   plugins: [
     solidPlugin({
       solid: {
-        moduleName: 'excalibur-ui',
+        moduleName: 'excalibur-ui/runtime',
         generate: 'universal',
       },
     }),
@@ -36,6 +37,10 @@ export default defineConfig({
       ? ['dot', 'github-actions']
       : 'default',
     browser: {
+      viewport: {
+        width: 800,
+        height: 600,
+      },
       enabled: true,
       isolate: true,
       headless: true, // uncomment to debug
@@ -81,8 +86,11 @@ export default defineConfig({
             throw e
           })
 
-          const iframe = await page.$('[id=vitest-tester] iframe')
+          const iframe = await page.$('iframe')
 
+          if (!iframe) {
+            throw new Error('iframe not found')
+          }
           const next = await iframe!.screenshot()
 
           // if prev doesnt exist just compare against itself for consistent return data
@@ -117,6 +125,25 @@ export default defineConfig({
 
           return { ...result, hadPrev: !!prev }
         },
+        async enablePageLogs(context) {
+          if (context.provider.name !== 'playwright')
+            throw new Error('Not implemented for provider')
+
+          if (!context.testPath) {
+            throw new Error('testPath not found')
+          }
+
+          const page = (context.provider as any).page as Page
+
+          const listener = (msg: any) => {
+            console.log(`[${msg.type()}] ${msg.text()}`)
+          }
+          page.on('console', listener)
+
+          page.on('close', () => {
+            page.off('console', listener)
+          })
+        },
       },
     },
   },
@@ -134,5 +161,6 @@ declare module '@vitest/browser/context' {
       name: string,
       threshold?: number,
     ) => Promise<looksSame.LooksSameBaseResult & { hadPrev?: boolean }>
+    enablePageLogs: () => void
   }
 }

@@ -28,8 +28,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/excalibur-ui.js",
-      "require": "./dist/excalibur-ui.umd.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
     }
   },
   "scripts": {
@@ -41,7 +46,7 @@
   "devDependencies": {
     "@adobe/css-tools": "^4.3.3",
     "@types/node": "^20.12.12",
-    "@vitest/browser": "2.0.0-beta.3",
+    "@vitest/browser": "2.0.0-beta.5",
     "excalibur": "^0.29.3",
     "expect-dom": "file:../expect-dom",
     "jsdom": "^24.0.0",
@@ -50,7 +55,7 @@
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vite-plugin-solid": "^2.10.2",
-    "vitest": "2.0.0-beta.3"
+    "vitest": "2.0.0-beta.5"
   },
   "dependencies": {
     "solid-js": ">=1.8"

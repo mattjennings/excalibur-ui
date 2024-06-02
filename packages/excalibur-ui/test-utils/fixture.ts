@@ -2,7 +2,6 @@ import '$test-utils/vitest-setup'
 import { test as base } from 'vitest'
 import { WebAudio } from 'excalibur'
 import * as ex from 'excalibur'
-import { renderUI } from '../src/runtime'
 import { UIContainer } from '../src/ui-container'
 import { ViewElement } from '../src'
 
@@ -22,7 +21,7 @@ export const test = base.extend<{
 
   useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
   dispatchKeyEvent: (type: string, key: string) => void
-  renderUI: (ui: () => any) => void
+  renderUI: (ui: () => any) => UIContainer
 }>({
   game: async ({ loader }, use) => {
     // only make the game once
@@ -57,18 +56,19 @@ export const test = base.extend<{
     const loader = new ex.Loader(resources)
     await use(loader)
   },
-  useNewScene: async ({ game }, use) => {
+  useNewScene: async ({ game, clock }, use) => {
     await use(async (scene = ex.Scene) => {
       game.add('test', new scene())
 
       await game.goToScene('test')
-
       return game.currentScene
     })
-    // cleanup actors
-    game.currentScene?.actors.forEach((actor) => actor.kill())
+
+    game.currentScene.entities.forEach((e) => e.kill())
+    clock.step()
     await game.goToScene('root')
     game.removeScene('test')
+    clock.step()
   },
   dispatchKeyEvent: async ({ game }, use) => {
     await use((type, code) => {
@@ -83,15 +83,13 @@ export const test = base.extend<{
   },
   renderUI: async ({ scene, clock }, use) => {
     await use((ui) => {
-      renderUI(scene, ui)
+      const container = new UIContainer(ui)
+      scene.add(container)
       // 2 steps seem to be needed to trigger 'initialize' on entities
       clock.step()
       clock.step()
 
-      return (
-        scene.entities.find((entity) => entity instanceof UIContainer)
-          ?.children ?? []
-      )
+      return container
     })
   },
 })
@@ -113,6 +111,6 @@ declare module 'vitest' {
     clock: ex.TestClock
     useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
     dispatchKeyEvent: (type: string, key: string) => void
-    renderUI: <T extends ViewElement>(ui: () => any) => T[]
+    renderUI: <T extends ViewElement>(ui: () => any) => UIContainer
   }
 }

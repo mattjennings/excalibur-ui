@@ -4,11 +4,13 @@ import { resolve } from 'path'
 export default defineConfig({
   build: {
     sourcemap: true,
-    emptyOutDir: false,
+    emptyOutDir: true,
     lib: {
-      entry: resolve(__dirname, 'src/index.tsx'),
-      name: 'excalibur-ui',
-      fileName: 'excalibur-ui',
+      entry: [
+        resolve(__dirname, 'src/index.tsx'),
+        resolve(__dirname, 'src/runtime.tsx'),
+      ],
+      formats: ['es', 'cjs'],
     },
     rollupOptions: {
       external: ['excalibur', 'solid-js'],

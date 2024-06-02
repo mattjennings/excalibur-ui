@@ -19,38 +19,44 @@ test('renders a view inside a UIContainer', async ({ renderUI, scene }) => {
 
 describe('props', () => {
   test('pos', async ({ renderUI }) => {
-    const [el] = renderUI(() => <ex-view pos={ex.vec(100, 100)} />)
+    const container = renderUI(() => <ex-view pos={ex.vec(100, 100)} />)
+    const [el] = container.children
 
     expect(el.transform.pos.x).toBe(100)
     expect(el.transform.pos.y).toBe(100)
   })
 
   test('x', async ({ renderUI }) => {
-    const [el] = renderUI(() => <ex-view x={100} />)
+    const container = renderUI(() => <ex-view x={100} />)
+    const [el] = container.children
 
     expect(el.transform.pos.x).toBe(100)
   })
 
   test('y', async ({ renderUI }) => {
-    const [el] = renderUI(() => <ex-view y={100} />)
+    const container = renderUI(() => <ex-view y={100} />)
+    const [el] = container.children
 
     expect(el.transform.pos.y).toBe(100)
   })
 
   test('z', async ({ renderUI }) => {
-    const [el] = renderUI(() => <ex-view z={100} />)
+    const container = renderUI(() => <ex-view z={100} />)
+    const [el] = container.children
 
     expect(el.transform.z).toBe(100)
   })
 
   test('width', async ({ renderUI }) => {
-    const [el] = renderUI(() => <ex-view width={100} />)
+    const container = renderUI(() => <ex-view width={100} />)
+    const [el] = container.children
 
     expect(el.localBounds.width).toBe(100)
   })
 
   test('height', async ({ renderUI }) => {
-    const [el] = renderUI(() => <ex-view height={100} />)
+    const container = renderUI(() => <ex-view height={100} />)
+    const [el] = container.children
     expect(el.localBounds.height).toBe(100)
   })
 })
