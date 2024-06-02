@@ -1,23 +1,23 @@
-import { UIContainer, useTweenedValue } from 'excalibur-ui'
+import { UI, useTweenedValue } from 'excalibur-ui'
 
 export default class Tween extends ex.Scene {
   onInitialize() {
-    this.add(new UIContainer(() => <UI />))
+    this.add(
+      new UI(() => {
+        const [y, setY] = useTweenedValue(800, {
+          duration: 1000,
+          easing: ex.EasingFunctions.EaseInOutCubic,
+          onComplete: () => {
+            setY(Math.random() * 400)
+          },
+        })
+
+        setY(400)
+
+        return <TextBox pos={ex.vec(0, y())} text="This is a text box" />
+      }),
+    )
   }
-}
-
-function UI() {
-  const [y, setY] = useTweenedValue(800, {
-    duration: 1000,
-    easing: ex.EasingFunctions.EaseInOutCubic,
-    onComplete: () => {
-      setY(Math.random() * 400)
-    },
-  })
-
-  setY(400)
-
-  return <TextBox pos={ex.vec(0, y())} text="This is a text box" />
 }
 
 function TextBox(props: { pos: ex.Vector; text: string }) {

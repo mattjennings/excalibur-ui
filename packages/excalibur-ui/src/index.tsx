@@ -1,4 +1,7 @@
+/// <reference path="./runtime.tsx" />
+// ^ makes the JSX.IntrinsicElements included when excalibur-ui is imported
 export * from './elements'
 export * from './hooks'
 export * from './animation'
-export { UIContainer, type Resolution } from './ui-container'
+export { UI } from './ui'
+export * from './util'

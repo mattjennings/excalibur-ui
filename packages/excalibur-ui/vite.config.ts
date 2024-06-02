@@ -4,7 +4,7 @@ import { resolve } from 'path'
 export default defineConfig({
   build: {
     sourcemap: true,
-    emptyOutDir: true,
+    emptyOutDir: false,
     lib: {
       entry: [
         resolve(__dirname, 'src/index.tsx'),
@@ -20,5 +20,6 @@ export default defineConfig({
         },
       },
     },
+    minify: false,
   },
 })

@@ -2,7 +2,7 @@ import '$test-utils/vitest-setup'
 import { test as base } from 'vitest'
 import { WebAudio } from 'excalibur'
 import * as ex from 'excalibur'
-import { UIContainer } from '../src/ui-container'
+import { UI } from '../src/ui'
 import { ViewElement } from '../src'
 
 // @ts-ignore - suppress audio warning
@@ -21,7 +21,7 @@ export const test = base.extend<{
 
   useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
   dispatchKeyEvent: (type: string, key: string) => void
-  renderUI: (ui: () => any) => UIContainer
+  renderUI: (ui: () => any) => UI
 }>({
   game: async ({ loader }, use) => {
     // only make the game once
@@ -83,7 +83,7 @@ export const test = base.extend<{
   },
   renderUI: async ({ scene, clock }, use) => {
     await use((ui) => {
-      const container = new UIContainer(ui)
+      const container = new UI(ui)
       scene.add(container)
       // 2 steps seem to be needed to trigger 'initialize' on entities
       clock.step()
@@ -111,6 +111,6 @@ declare module 'vitest' {
     clock: ex.TestClock
     useNewScene: (scene?: typeof ex.Scene) => Promise<ex.Scene>
     dispatchKeyEvent: (type: string, key: string) => void
-    renderUI: <T extends ViewElement>(ui: () => any) => UIContainer
+    renderUI: <T extends ViewElement>(ui: () => any) => UI
   }
 }

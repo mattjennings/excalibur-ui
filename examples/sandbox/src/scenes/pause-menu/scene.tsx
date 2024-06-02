@@ -1,17 +1,12 @@
 import { Engine } from 'excalibur'
-import {
-  RectangleProps,
-  UIContainer,
-  useTweenedValue,
-  useValue,
-} from 'excalibur-ui'
+import { RectangleProps, UI, useTweenedValue, useValue } from 'excalibur-ui'
 import { createEffect } from 'solid-js'
 
 export default class Pause extends ex.Scene {
   paused = false
 
   onInitialize() {
-    this.add(new UIContainer(() => <UI scene={this} />))
+    this.add(new UI(() => <PauseScreen scene={this} />))
   }
 
   onPreUpdate(engine: Engine<any>, delta: number): void {
@@ -21,7 +16,7 @@ export default class Pause extends ex.Scene {
   }
 }
 
-function UI(props: { scene: Pause }) {
+function PauseScreen(props: { scene: Pause }) {
   const paused = useValue(() => props.scene.paused)
 
   // Tween from 0-1 when pausing so we can use it for animations

@@ -21,9 +21,9 @@ import {
   TransformComponent,
   Vector,
 } from 'excalibur'
-import { UIContainer } from '../ui-container'
 import { createStore } from 'solid-js/store'
 import { JSXElement } from 'solid-js'
+import { BaseElement, BaseElementProps } from '../base-element'
 
 export default createExElement({
   init() {
@@ -38,7 +38,8 @@ export default createExElement({
   },
 })
 
-export interface ViewProps<T extends ViewElement = ViewElement> {
+export interface ViewProps<T extends ViewElement = ViewElement>
+  extends BaseElementProps {
   ref?: (el: T) => void
   pos?: Vector
   x?: number
@@ -101,81 +102,18 @@ export interface ViewProps<T extends ViewElement = ViewElement> {
 /**
  * Base class for all UI elements.
  */
-export class ViewElement extends Entity {
-  private _transform!: TransformComponent
+export class ViewElement extends BaseElement {
   private _pointer!: PointerComponent
 
   private _localBounds: BoundingBox = new BoundingBox(0, 0, 0, 0)
 
   declare events: EventEmitter
 
-  private _uiContainer?: UIContainer
-
-  private _htmlElement: HTMLElement | null = null
-  private _htmlProps: Record<string, any>
-  private _setHtmlProps: (props: Record<string, any>) => void
-
   constructor() {
     super()
-    this._transform = new TransformComponent()
     this._pointer = new PointerComponent()
 
-    this.addComponent(this._transform)
     this.addComponent(this._pointer)
-
-    const [htmlProps, setHtmlProps] = createStore<Record<string, any>>({
-      style: {
-        position: 'absolute',
-        left: '0',
-        top: '0',
-        width: '0',
-        height: '0',
-      },
-    })
-
-    this._htmlProps = htmlProps
-    this._setHtmlProps = setHtmlProps
-
-    this.on('predraw', () => {
-      if (this.isInitialized && this._htmlElement) {
-        this._setHtmlProps(this.htmlProps)
-      }
-    })
-
-    this.on('initialize', () => {
-      let parent = this.parent
-      while (parent) {
-        if (parent instanceof UIContainer) {
-          this.uiContainer = parent
-          break
-        }
-        parent = parent.parent
-      }
-    })
-  }
-
-  kill() {
-    this.events.emit('prekill')
-    this.onPreKill?.()
-
-    if (this._htmlElement) {
-      this._htmlElement.remove()
-    }
-
-    for (const child of [...this.children]) {
-      child.kill()
-    }
-
-    super.kill()
-    this.events.emit('postkill')
-    this.onPostKill?.()
-  }
-
-  onPreKill() {}
-  onPostKill() {}
-
-  get transform() {
-    return this._transform
   }
 
   get pointer(): PointerComponent {
@@ -259,50 +197,6 @@ export class ViewElement extends Entity {
 
   set rotation(value: number) {
     this.transform.rotation = value
-  }
-
-  get uiContainer(): UIContainer | undefined {
-    return this._uiContainer
-  }
-
-  set uiContainer(value: UIContainer) {
-    this._uiContainer = value
-
-    if (this._htmlElement) {
-      value.htmlElement.appendChild(this._htmlElement)
-    }
-  }
-
-  set html(node: (props: any) => HTMLElement) {
-    if (this._htmlElement) {
-      this._htmlElement.remove()
-    }
-    this._htmlElement = node(this._htmlProps)
-
-    if (this.uiContainer) {
-      this.uiContainer.htmlElement.appendChild(this._htmlElement)
-    }
-  }
-
-  toCssPx(value: number) {
-    return `calc(${value} * var(--px))`
-  }
-
-  get htmlProps() {
-    if (!this.scene) return {}
-    if (!this._htmlElement) return {}
-
-    const screenPos = this.scene.engine.worldToScreenCoordinates(this.globalPos)
-
-    return {
-      style: {
-        position: 'absolute',
-        left: this.toCssPx(screenPos.x - this.width),
-        top: this.toCssPx(screenPos.y - this.height),
-        width: this.toCssPx(this.width),
-        height: this.toCssPx(this.height),
-      },
-    }
   }
 }
 

@@ -9,7 +9,7 @@ import {
   ViewProps,
   elements,
 } from './elements'
-import { UIContainer } from './ui-container'
+import { UI } from './ui'
 
 declare global {
   namespace JSX {
@@ -25,7 +25,7 @@ declare global {
 type ExElement = ViewElement & {
   __exui?: { type: string }
 }
-type NodeType = ExElement | HTMLElement | Text | UIContainer
+type NodeType = ExElement | HTMLElement | Text | UI
 
 const HTML_PROPERTIES = new Set(['className', 'textContent'])
 
@@ -113,7 +113,7 @@ const {
     // adding html element
     if (isHtmlElement(node) || isTextNode(node)) {
       // parent is ui container
-      if (isUIContainer(parent)) {
+      if (isUI(parent)) {
         parent.htmlElement.insertBefore(node, anchor as Node)
       }
       // parent is html element
@@ -121,7 +121,7 @@ const {
         parent.insertBefore(node, anchor as Node)
       } else {
         if (isExElement(parent)) {
-          throw new Error('Cannot insert html element into excalibur element')
+          parent.htmlElement.insertBefore(node, anchor as Node)
         } else {
           throw new Error('Unknown parent type')
         }
@@ -135,7 +135,6 @@ const {
       } else {
         // unsupported
         if (isHtmlElement(parent)) {
-          debugger
           throw new Error('Cannot insert excalibur element into html element')
         } else {
           throw new Error('Unknown parent type')
@@ -150,7 +149,7 @@ const {
     if (isHtmlElement(node) || isTextNode(node)) {
       if (isHtmlElement(parent)) {
         parent.removeChild(node)
-      } else if (isUIContainer(parent)) {
+      } else if (isUI(parent)) {
         parent.htmlElement.removeChild(node)
       } else {
         throw new Error('Unknown parent type')
@@ -211,7 +210,7 @@ const {
 })
 
 function isExElement(node: NodeType): node is ExElement {
-  return node instanceof ViewElement || node instanceof UIContainer
+  return node instanceof ViewElement || node instanceof UI
 }
 
 function isHtmlElement(node: NodeType): node is HTMLElement {
@@ -222,8 +221,8 @@ function isTextNode(node: NodeType): node is Text {
   return node instanceof Text
 }
 
-function isUIContainer(node: unknown): node is UIContainer {
-  return node instanceof UIContainer
+function isUI(node: unknown): node is UI {
+  return node instanceof UI
 }
 
 export {

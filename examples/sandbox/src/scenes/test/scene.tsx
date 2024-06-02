@@ -1,4 +1,4 @@
-import { UIContainer, useValue } from 'excalibur-ui'
+import { UI, useValue } from 'excalibur-ui'
 import { Engine } from 'excalibur'
 
 export default class Level1 extends ex.Scene {
@@ -7,6 +7,37 @@ export default class Level1 extends ex.Scene {
 
   onInitialize() {
     this.add(new Player())
+
+    this.add(
+      new UI(() => (
+        <ex-view
+          style={{
+            position: 'absolute',
+            display: 'flex',
+            'flex-direction': 'column',
+            gap: '10px',
+            width: '500px',
+          }}
+        >
+          <ex-rectangle
+            color="#ff4400"
+            style={{
+              width: '100px',
+              height: '100px',
+              color: '#ff0000',
+            }}
+          />
+          <ex-rectangle
+            color="#ff4400"
+            style={{
+              width: '100px',
+              height: '100px',
+              color: '#ff0000',
+            }}
+          />
+        </ex-view>
+      )),
+    )
   }
 
   onPreUpdate(engine: Engine<any>, delta: number): void {
@@ -39,30 +70,28 @@ class Player extends ex.Actor {
       // this.scene!.camera.pos.x += 5 / delta
     })
 
-    this.scene?.add(
-      new UIContainer(() => {
-        const pos = useValue(() => this.pos)
-
+    this.addChild(
+      new UI(() => {
         return (
           <>
-            <ex-rectangle
-              html={(props) => (
-                <button
-                  style={{
-                    ...props.style,
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => alert('clicked')}
-                ></button>
-              )}
-              x={pos().x}
-              y={100}
+            <button>sadf</button>
+
+            {/* <ex-rectangle
               color="#ff4400"
-              width={140}
-              height={80}
+              style={{
+                width: '100px',
+                height: '100px',
+                color: '#ff0000',
+              }}
             >
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+                onClick={() => alert('clicked')}
+              ></button>
               <ex-text
                 text="I'm a button"
                 x={10}
@@ -72,19 +101,18 @@ class Player extends ex.Actor {
                   size: 20,
                 }}
               />
-            </ex-rectangle>
+            </ex-rectangle> */}
 
-            <ex-text
+            {/* <ex-text
               text="Player"
               anchor={ex.Vector.Half}
-              x={pos().x}
-              y={pos().y - 60}
+              y={-60}
               color="#ffffff"
               font={{
                 size: 20,
                 family: 'Arial',
               }}
-            />
+            /> */}
           </>
         )
       }),

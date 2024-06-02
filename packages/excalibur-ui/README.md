@@ -56,16 +56,16 @@ export default defineConfig({
 
 ## Usage
 
-All UI is rendered inside of a `UIContainer` entity. This can be added to a scene or as a child
+All UI is rendered inside of a `UI` entity. This can be added to a scene or as a child
 of another entity.
 
 ```tsx
-import { UIContainer } from 'excalibur-ui'
+import { UI } from 'excalibur-ui'
 
 class Scene extends ex.Scene {
   onInitialize() {
     this.add(
-      new UIContainer(() => {
+      new UI(() => {
         return (
           <ex-text
             text="Hello World!"
@@ -85,7 +85,7 @@ class Scene extends ex.Scene {
 class Actor extends ex.Actor {
   onInitialize() {
     this.addChild(
-      new UIContainer(() => {
+      new UI(() => {
         return (
           <ex-text
             text="Hello World!"
@@ -113,14 +113,14 @@ You may want to manage state at the entity/scene level using class properties, s
 will provide a signal that is updated every frame. You can use this to get values from the parent entity/scene.
 
 ```tsx
-import { UIContainer, useValue } from 'excalibur-ui'
+import { UI, useValue } from 'excalibur-ui'
 
 class Actor extends ex.Actor {
   health = 0
 
   onInitialize() {
     this.addChild(
-      new UIContainer(() => {
+      new UI(() => {
         const health = useValue(() => this.health)
 
         return (
@@ -147,14 +147,14 @@ Note that HTML elements are always positioned absolutely over the canvas, so the
 are not affected by parent's position unless you explicitly use it in the styling.
 
 ```tsx
-import { UIContainer, useValue } from 'excalibur-ui'
+import { UI, useValue } from 'excalibur-ui'
 
 class Actor extends ex.Actor {
   onInitialize() {
     this.pos = ex.vec(100, 100)
 
     this.addChild(
-      new UIContainer(() => {
+      new UI(() => {
         const screenPos = useValue(() =>
           this.scene.engine.worldToScreenCoordinates(this.pos),
         )
@@ -189,12 +189,12 @@ There's a lot missing here, but currently you can use:
 and these will render as native Excalibur entities onto the scene.
 
 ```tsx
-import { UIContainer } from 'excalibur-ui'
+import { UI } from 'excalibur-ui'
 
 class Scene extends ex.Scene {
   onInitialize() {
     this.add(
-      new UIContainer(() => {
+      new UI(() => {
         return (
           <ex-view pos={ex.vec(100, 100)}>
             <ex-graphic

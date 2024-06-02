@@ -1,6 +1,6 @@
 import { createExElement } from '.'
 
-import { Rectangle } from 'excalibur'
+import { Color, Rectangle } from 'excalibur'
 import { RasterElement, RasterProps } from './raster'
 
 export default createExElement({

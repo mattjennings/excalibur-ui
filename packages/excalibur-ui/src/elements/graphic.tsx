@@ -1,4 +1,4 @@
-import { BoundingBox, GraphicsComponent, Vector } from 'excalibur'
+import { BoundingBox, Color, GraphicsComponent, Vector } from 'excalibur'
 import { createExElement } from '.'
 import { ViewElement, ViewProps } from './view'
 
@@ -115,25 +115,22 @@ export class GraphicElement extends ViewElement {
     return this.graphics.material
   }
 
-  get htmlProps() {
-    if (!this.scene) return {}
+  applyNativeStyle(styles: CSSStyleDeclaration): void {
+    super.applyNativeStyle(styles)
+    const rect = this.getLocalBoundingClientRect()
 
-    const screenPos = this.scene.engine.worldToScreenCoordinates(this.globalPos)
+    if (this.graphic) {
+      if ('width' in this.graphic) {
+        this.graphic.width = rect.width
+      }
 
-    const superProps = super.htmlProps
+      if ('height' in this.graphic) {
+        this.graphic.height = rect.height
+      }
 
-    return {
-      ...superProps,
-      style: {
-        ...superProps.style,
-
-        left: this.toCssPx(
-          screenPos.x - this.localBounds.width * this.anchor.x,
-        ),
-        top: this.toCssPx(
-          screenPos.y - this.localBounds.height * this.anchor.y,
-        ),
-      },
+      if (styles.color && 'color' in this.graphic) {
+        this.graphic.color = Color.fromRGBString(styles.color)
+      }
     }
   }
 }
