@@ -1,4 +1,4 @@
-import { renderUI, useValue } from 'excalibur-ui'
+import { UIContainer, useValue } from 'excalibur-ui'
 import { Engine } from 'excalibur'
 
 export default class Level1 extends ex.Scene {
@@ -39,53 +39,55 @@ class Player extends ex.Actor {
       // this.scene!.camera.pos.x += 5 / delta
     })
 
-    renderUI(this, () => {
-      const pos = useValue(() => this.pos)
+    this.scene?.add(
+      new UIContainer(() => {
+        const pos = useValue(() => this.pos)
 
-      return (
-        <>
-          <ex-rectangle
-            html={(props) => (
-              <button
-                style={{
-                  ...props.style,
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
+        return (
+          <>
+            <ex-rectangle
+              html={(props) => (
+                <button
+                  style={{
+                    ...props.style,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => alert('clicked')}
+                ></button>
+              )}
+              x={pos().x}
+              y={100}
+              color="#ff4400"
+              width={140}
+              height={80}
+            >
+              <ex-text
+                text="I'm a button"
+                x={10}
+                y={25}
+                color="#ffffff"
+                font={{
+                  size: 20,
                 }}
-                onClick={() => alert('clicked')}
-              ></button>
-            )}
-            x={pos().x}
-            y={100}
-            color="#ff4400"
-            width={140}
-            height={80}
-          >
+              />
+            </ex-rectangle>
+
             <ex-text
-              text="I'm a button"
-              x={10}
-              y={25}
+              text="Player"
+              anchor={ex.Vector.Half}
+              x={pos().x}
+              y={pos().y - 60}
               color="#ffffff"
               font={{
                 size: 20,
+                family: 'Arial',
               }}
             />
-          </ex-rectangle>
-
-          <ex-text
-            text="Player"
-            anchor={ex.Vector.Half}
-            x={pos().x}
-            y={pos().y - 60}
-            color="#ffffff"
-            font={{
-              size: 20,
-              family: 'Arial',
-            }}
-          />
-        </>
-      )
-    })
+          </>
+        )
+      }),
+    )
   }
 }

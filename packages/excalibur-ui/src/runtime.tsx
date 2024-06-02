@@ -1,4 +1,5 @@
-import { createSignal, onCleanup } from 'solid-js'
+import { onCleanup } from 'solid-js'
+import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
 import { createRenderer } from 'solid-js/universal'
 import {
   GraphicProps,
@@ -8,9 +9,7 @@ import {
   ViewProps,
   elements,
 } from './elements'
-import { Resolution, UIContainer } from './ui-container'
-import { JSX as JSXSolid } from 'solid-js/types/jsx.d.ts'
-import { Entity, Scene } from 'excalibur'
+import { UIContainer } from './ui-container'
 
 declare global {
   namespace JSX {
@@ -136,6 +135,7 @@ const {
       } else {
         // unsupported
         if (isHtmlElement(parent)) {
+          debugger
           throw new Error('Cannot insert excalibur element into html element')
         } else {
           throw new Error('Unknown parent type')
@@ -210,79 +210,6 @@ const {
   },
 })
 
-/**
- * Renders a Solid JSX UI into an Excalibur scene or entity. Only call this
- * once i.e during intialization of scene or entity.
- */
-function renderUI<T extends Scene | Entity>(
-  sceneOrEntity: T,
-  ui: () => NodeType,
-  options?: {
-    html?: {
-      resolution?: Resolution
-      tag?: string
-      id?: string
-    }
-  },
-) {
-  let container: UIContainer
-
-  const [didRender, setDidRender] = createSignal(false)
-
-  const scene = isScene(sceneOrEntity) ? sceneOrEntity : sceneOrEntity.scene!
-
-  scene.on('predraw', () => {
-    if (!didRender()) {
-      if (container) {
-        setDidRender(true)
-        render(ui, container)
-      }
-    }
-  })
-
-  scene.on('activate', () => {
-    setup()
-  })
-
-  scene.on('deactivate', () => {
-    if (container) {
-      container.kill()
-    }
-    setDidRender(false)
-  })
-
-  const setup = () => {
-    container = new UIContainer(options?.html)
-    scene.add(container)
-  }
-
-  if (isScene(sceneOrEntity)) {
-    const isCurrentScene = sceneOrEntity === sceneOrEntity.engine.currentScene
-    if (isCurrentScene && scene.isInitialized) {
-      setup()
-    }
-  } else if (isEntity(sceneOrEntity)) {
-    if (sceneOrEntity.isInitialized) {
-      setup()
-    }
-
-    sceneOrEntity.on('kill', () => {
-      if (container) {
-        container.kill()
-      }
-      setDidRender(false)
-    })
-  }
-}
-
-function isEntity(node: Entity | Scene): node is Entity {
-  return node instanceof Entity
-}
-
-function isScene(node: Entity | Scene): node is Scene {
-  return node instanceof Scene
-}
-
 function isExElement(node: NodeType): node is ExElement {
   return node instanceof ViewElement || node instanceof UIContainer
 }
@@ -300,27 +227,27 @@ function isUIContainer(node: unknown): node is UIContainer {
 }
 
 export {
-  renderUI,
-  effect,
-  memo,
   createComponent,
   createElement,
   createTextNode,
-  insertNode,
+  effect,
   insert,
-  spread,
-  setProp,
+  insertNode,
+  memo,
   mergeProps,
+  render,
+  setProp,
+  spread,
   use,
 }
 // Forward Solid control flow
 export {
+  ErrorBoundary,
   For,
+  Index,
+  Match,
   Show,
   Suspense,
   SuspenseList,
   Switch,
-  Match,
-  Index,
-  ErrorBoundary,
 } from 'solid-js'

@@ -1,4 +1,4 @@
-import { renderUI, useEngineEvent, useSceneEvent } from 'excalibur-ui'
+import { UIContainer, useEngineEvent, useSceneEvent } from 'excalibur-ui'
 import { createMemo, createSignal } from 'solid-js'
 
 export default class Dialogue extends ex.Scene {
@@ -34,9 +34,11 @@ export default class Dialogue extends ex.Scene {
     this.input.pointers.on('down', playNextLine)
     this.input.keyboard.on('press', playNextLine)
 
-    renderUI(this, () => {
-      return <TextBox pos={ex.vec(0, 200)} text={typed()} />
-    })
+    this.add(
+      new UIContainer(() => {
+        return <TextBox pos={ex.vec(0, 200)} text={typed()} />
+      }),
+    )
   }
 }
 

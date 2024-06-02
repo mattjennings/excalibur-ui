@@ -1,7 +1,7 @@
 import { Engine } from 'excalibur'
 import {
   RectangleProps,
-  renderUI,
+  UIContainer,
   useTweenedValue,
   useValue,
 } from 'excalibur-ui'
@@ -11,7 +11,7 @@ export default class Pause extends ex.Scene {
   paused = false
 
   onInitialize() {
-    renderUI(this, () => <UI scene={this} />)
+    this.add(new UIContainer(() => <UI scene={this} />))
   }
 
   onPreUpdate(engine: Engine<any>, delta: number): void {

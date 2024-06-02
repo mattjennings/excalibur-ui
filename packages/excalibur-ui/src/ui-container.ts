@@ -1,10 +1,12 @@
 import {
-  Entity,
   Engine,
-  TransformComponent,
+  Entity,
   GraphicsComponent,
+  TransformComponent,
   Vector,
 } from 'excalibur'
+import { JSXElement } from 'solid-js'
+import { render } from './runtime'
 
 /**
  * When 'native' the UI will be sized to the actual "css" pixels of the canvas.
@@ -28,18 +30,24 @@ export class UIContainer extends Entity {
   transform: TransformComponent
   graphics: GraphicsComponent
 
-  constructor({
-    tag = 'div',
-    id,
-    parent = document.body,
-    resolution = 'scaled',
-  }: {
-    tag?: string
-    id?: string
-    parent?: HTMLElement
-    resolution?: Resolution
-  } = {}) {
+  private ui: () => JSXElement
+
+  constructor(
+    ui: () => JSXElement,
+    {
+      tag = 'div',
+      id,
+      parent = document.body,
+      resolution = 'scaled',
+    }: {
+      tag?: string
+      id?: string
+      parent?: HTMLElement
+      resolution?: Resolution
+    } = {},
+  ) {
     super()
+    this.ui = ui
     this.resolution = resolution
     this.htmlElement = document.createElement(tag)
     this.htmlElement.style.position = 'absolute'
@@ -80,6 +88,32 @@ export class UIContainer extends Entity {
     this.engine = engine
     this.parentElement.appendChild(this.htmlElement)
     this.resizeToCanvas()
+
+    let didRender = false
+    const scene = this.scene!
+
+    scene.on('predraw', () => {
+      if (!didRender) {
+        didRender = true
+        render(this.ui as any, this)
+      }
+    })
+
+    scene.on('activate', () => {
+      this.show()
+    })
+
+    scene.on('deactivate', () => {
+      this.hide()
+    })
+  }
+
+  show() {
+    this.htmlElement.removeAttribute('hidden')
+  }
+
+  hide() {
+    this.htmlElement.setAttribute('hidden', '')
   }
 
   resizeToCanvas = () => {
