@@ -22,7 +22,7 @@ Update your `.babelrc` file:
     [
       "babel-preset-solid",
       {
-        "moduleName": "excalibur-ui",
+        "moduleName": "excalibur-ui/runtime",
         "generate": "universal"
       }
     ]
@@ -46,7 +46,7 @@ export default defineConfig({
   plugins: [
     solidPlugin({
       solid: {
-        moduleName: 'excalibur-ui',
+        moduleName: 'excalibur-ui/runtime',
         generate: 'universal',
       },
     }),
@@ -56,44 +56,51 @@ export default defineConfig({
 
 ## Usage
 
-UI can be rendered either on a Scene or Entity, and should be called once during `onInitialize`.
+All UI is rendered inside of a `UIContainer` entity. This can be added to a scene or as a child
+of another entity.
 
 ```tsx
-import { renderUI } from 'excalibur-ui'
+import { UIContainer } from 'excalibur-ui'
 
 class Scene extends ex.Scene {
   onInitialize() {
-    renderUI(this, () => {
-      return (
-        <ex-text
-          text="Hello World!"
-          pos={ex.vec(100, 100)}
-          color="#ffffff"
-          font={{
-            size: 50,
-            family: 'Arial',
-          }}
-        />
-      )
-    })
+    this.add(
+      new UIContainer(() => {
+        return (
+          <ex-text
+            text="Hello World!"
+            pos={ex.vec(100, 100)}
+            color="#ffffff"
+            font={{
+              size: 50,
+              family: 'Arial',
+            }}
+          />
+        )
+      }),
+    )
   }
 }
 
 class Actor extends ex.Actor {
   onInitialize() {
-    renderUI(this, () => {
-      return (
-        <ex-text
-          text="Hello World!"
-          pos={ex.vec(100, 100)}
-          color="#ffffff"
-          font={{
-            size: 50,
-            family: 'Arial',
-          }}
-        />
-      )
-    })
+    this.addChild(
+      new UIContainer(() => {
+        return (
+          <ex-text
+            text="Hello World!"
+            // ex-* elements act as normal Excalibur entities, so their positions
+            // are relative to their parent entity
+            pos={ex.vec(0, 0)}
+            color="#ffffff"
+            font={{
+              size: 50,
+              family: 'Arial',
+            }}
+          />
+        )
+      }),
+    )
   }
 }
 ```
@@ -106,27 +113,28 @@ You may want to manage state at the entity/scene level using class properties, s
 will provide a signal that is updated every frame. You can use this to get values from the parent entity/scene.
 
 ```tsx
-import { useValue } from 'excalibur-ui'
+import { UIContainer, useValue } from 'excalibur-ui'
 
 class Actor extends ex.Actor {
+  health = 0
+
   onInitialize() {
-    this.pos = ex.vec(100, 100)
+    this.addChild(
+      new UIContainer(() => {
+        const health = useValue(() => this.health)
 
-    renderUI(this, () => {
-      const pos = useValue(() => this.pos)
-
-      return (
-        <ex-text
-          text="Hello World!"
-          pos={pos()}
-          color="#ffffff"
-          font={{
-            size: 50,
-            family: 'Arial',
-          }}
-        />
-      )
-    })
+        return (
+          <ex-text
+            text={`Health: ${health}`}
+            color="#ffffff"
+            font={{
+              size: 50,
+              family: 'Arial',
+            }}
+          />
+        )
+      }),
+    )
   }
 }
 ```
@@ -135,31 +143,36 @@ class Actor extends ex.Actor {
 
 All HTML elements are supported and render on top of the game canvas.
 
+Note that HTML elements are always positioned absolutely over the canvas, so they
+are not affected by parent's position unless you explicitly use it in the styling.
+
 ```tsx
-import { useValue } from 'excalibur-ui'
+import { UIContainer, useValue } from 'excalibur-ui'
 
 class Actor extends ex.Actor {
   onInitialize() {
     this.pos = ex.vec(100, 100)
 
-    renderUI(this, () => {
-      const screenPos = useValue(() =>
-        this.scene.engine.worldToScreenCoordinates(this.pos),
-      )
+    this.addChild(
+      new UIContainer(() => {
+        const screenPos = useValue(() =>
+          this.scene.engine.worldToScreenCoordinates(this.pos),
+        )
 
-      return (
-        <div
-          style={{
-            position: 'absolute',
-            top: `${screenPos().x}px`,
-            left: `${screenPos().y}px`,
-            color: 'white',
-          }}
-        >
-          hello world
-        </div>
-      )
-    })
+        return (
+          <div
+            style={{
+              position: 'absolute',
+              top: `${screenPos().x}px`,
+              left: `${screenPos().y}px`,
+              color: 'white',
+            }}
+          >
+            hello world
+          </div>
+        )
+      }),
+    )
   }
 }
 ```
@@ -176,32 +189,36 @@ There's a lot missing here, but currently you can use:
 and these will render as native Excalibur entities onto the scene.
 
 ```tsx
+import { UIContainer } from 'excalibur-ui'
+
 class Scene extends ex.Scene {
   onInitialize() {
-    renderUI(this, () => {
-      return (
-        <ex-view pos={ex.vec(100, 100)}>
-          <ex-graphic
-            graphic={new ex.Circle({ radius: 5, color: ex.Color.Red })}
-          />
-          <ex-text
-            text="Hello World!"
-            pos={ex.vec(100, 100)}
-            color="#ffffff"
-            font={{
-              size: 50,
-              family: 'Arial',
-            }}
-          />
-          <ex-rectangle
-            pos={ex.vec(100, 300)}
-            color="#ff4400"
-            width={140}
-            height={80}
-          />
-        </ex-view>
-      )
-    })
+    this.add(
+      new UIContainer(() => {
+        return (
+          <ex-view pos={ex.vec(100, 100)}>
+            <ex-graphic
+              graphic={new ex.Circle({ radius: 5, color: ex.Color.Red })}
+            />
+            <ex-text
+              text="Hello World!"
+              pos={ex.vec(100, 100)}
+              color="#ffffff"
+              font={{
+                size: 50,
+                family: 'Arial',
+              }}
+            />
+            <ex-rectangle
+              pos={ex.vec(100, 300)}
+              color="#ff4400"
+              width={140}
+              height={80}
+            />
+          </ex-view>
+        )
+      }),
+    )
   }
 }
 ```
