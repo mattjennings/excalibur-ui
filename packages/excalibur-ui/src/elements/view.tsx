@@ -39,15 +39,7 @@ export interface ViewProps<T extends ViewElement = ViewElement>
   extends BaseElementProps {
   ref?: (el: T) => void
   pos?: Vector
-  x?: number
-  y?: number
-  z?: number
-
   children?: JSXElement
-
-  width?: number
-  height?: number
-
   anchor?: Vector
   opacity?: number
   scale?: Vector
@@ -101,9 +93,7 @@ export interface ViewProps<T extends ViewElement = ViewElement>
  */
 export class ViewElement extends BaseElement {
   private _pointer!: PointerComponent
-
   private _localBounds: BoundingBox = new BoundingBox(0, 0, 0, 0)
-
   declare events: EventEmitter
 
   constructor() {
@@ -130,18 +120,8 @@ export class ViewElement extends BaseElement {
     return this.localBounds.width
   }
 
-  set width(value: number) {
-    const height = this.localBounds.height
-    this.localBounds = new BoundingBox(0, 0, value, height)
-  }
-
   get height() {
     return this.localBounds.height
-  }
-
-  set height(value: number) {
-    const width = this.localBounds.width
-    this.localBounds = new BoundingBox(0, 0, width, value)
   }
 
   get pos() {
@@ -152,48 +132,35 @@ export class ViewElement extends BaseElement {
     return this.transform.globalPos
   }
 
-  set pos(value: Vector) {
-    this.transform.pos = value
-  }
-
   get x() {
     return this.transform.pos.x
-  }
-
-  set x(value: number) {
-    this.transform.pos.x = value
   }
 
   get y() {
     return this.transform.pos.y
   }
 
-  set y(value: number) {
-    this.transform.pos.y = value
-  }
-
   get z() {
     return this.transform.z
-  }
-
-  set z(value: number) {
-    this.transform.z = value
   }
 
   get scale() {
     return this.transform.scale
   }
 
-  set scale(value: Vector) {
-    this.transform.scale = value
-  }
-
   get rotation() {
     return this.transform.rotation
   }
 
-  set rotation(value: number) {
-    this.transform.rotation = value
+  syncLayout(): void {
+    super.syncLayout()
+
+    this.localBounds = new BoundingBox(
+      0,
+      0,
+      this.clientRect.width,
+      this.clientRect.height,
+    )
   }
 }
 

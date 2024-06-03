@@ -5,7 +5,7 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   build: {
     sourcemap: true,
-    emptyOutDir: true,
+    emptyOutDir: false,
     lib: {
       entry: [
         resolve(__dirname, 'src/index.tsx'),

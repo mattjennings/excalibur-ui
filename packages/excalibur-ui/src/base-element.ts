@@ -1,9 +1,8 @@
+import * as csstype from 'csstype'
 import {
-  Color,
   Engine,
   Entity,
   EntityEvents,
-  GraphicsComponent,
   KillEvent,
   PostKillEvent,
   PreKillEvent,
@@ -12,49 +11,62 @@ import {
   Vector,
 } from 'excalibur'
 import { HTMLContainer } from './html-container'
-import * as csstype from 'csstype'
 
-export type LayoutProperties = Pick<
-  csstype.Properties,
-  | 'alignItems'
-  | 'alignSelf'
-  | 'display'
-  | 'flexBasis'
-  | 'flexDirection'
-  | 'flexGrow'
-  | 'flexShrink'
-  | 'flexWrap'
-  | 'gap'
-  | 'grid'
-  | 'gridArea'
-  | 'gridAutoColumns'
-  | 'gridAutoFlow'
-  | 'gridAutoRows'
-  | 'gridColumn'
-  | 'gridColumnGap'
-  | 'gridGap'
-  | 'gridRow'
-  | 'gridRowGap'
-  | 'gridTemplate'
-  | 'gridTemplateAreas'
-  | 'gridTemplateColumns'
-  | 'gridTemplateRows'
-  | 'height'
-  | 'justifyContent'
-  | 'justifyItems'
-  | 'justifySelf'
-  | 'left'
-  | 'margin'
-  | 'order'
-  | 'padding'
-  | 'placeContent'
-  | 'placeItems'
-  | 'placeSelf'
-  | 'position'
-  | 'top'
-  | 'width'
-  | 'zIndex'
->
+export interface LayoutProperties
+  extends Pick<
+    csstype.Properties,
+    | 'alignItems'
+    | 'alignSelf'
+    | 'display'
+    | 'flexBasis'
+    | 'flexDirection'
+    | 'flexGrow'
+    | 'flexShrink'
+    | 'flexWrap'
+    | 'gap'
+    | 'grid'
+    | 'gridArea'
+    | 'gridAutoColumns'
+    | 'gridAutoFlow'
+    | 'gridAutoRows'
+    | 'gridColumn'
+    | 'gridColumnGap'
+    | 'gridGap'
+    | 'gridRow'
+    | 'gridRowGap'
+    | 'gridTemplate'
+    | 'gridTemplateAreas'
+    | 'gridTemplateColumns'
+    | 'gridTemplateRows'
+    | 'height'
+    | 'justifyContent'
+    | 'justifyItems'
+    | 'justifySelf'
+    | 'left'
+    | 'margin'
+    | 'order'
+    | 'padding'
+    | 'placeContent'
+    | 'placeItems'
+    | 'placeSelf'
+    | 'position'
+    | 'top'
+    | 'width'
+    | 'zIndex'
+    | 'transition'
+    | 'transitionProperty'
+    | 'transitionDuration'
+    | 'transitionTimingFunction'
+    | 'transitionDelay'
+    | 'transform'
+    | 'transformOrigin'
+    | 'transformStyle'
+    | 'perspective'
+    | 'perspectiveOrigin'
+    | 'backfaceVisibility'
+    | 'rotate'
+    | 'scale'
+  > {}
 
 export interface BaseElementProps {
   layout?: LayoutProperties
@@ -65,29 +77,20 @@ export interface BaseElementProps {
  */
 export class BaseElement extends Entity {
   private _transform!: TransformComponent
+  protected _layout!: LayoutProperties
 
   htmlElement!: HTMLElement
   htmlContainer!: HTMLContainer
 
-  protected _styleDirty = true
-  protected _styleMutationObserver: MutationObserver | null = null
-  protected _layout!: LayoutProperties
+  clientRect!: Rect
+  localClientRect!: Rect
 
   constructor() {
     super()
     this.htmlElement = document.createElement('div')
-
     this.layout = {}
     this._transform = new TransformComponent()
     this.addComponent(this._transform)
-    this._styleMutationObserver = new MutationObserver(() => {
-      this._styleDirty = true
-    })
-
-    this._styleMutationObserver.observe(this.htmlElement, {
-      attributes: true,
-      attributeFilter: ['style', 'class'],
-    })
   }
 
   get transform() {
@@ -112,11 +115,6 @@ export class BaseElement extends Entity {
     }
   }
 
-  addChild(entity: BaseElement): Entity<any> {
-    super.addChild(entity)
-    return entity
-  }
-
   kill() {
     this.events.emit('prekill')
     this.onPreKill?.()
@@ -138,24 +136,99 @@ export class BaseElement extends Entity {
   onPostKill() {}
 
   syncLayout() {
-    const rect = this.getLocalBoundingClientRect()
+    const rect = this.localClientRect
     const transform = this.transform
 
     transform.pos = new Vector(rect.left, rect.top)
-    this._styleDirty = false
+
+    if (typeof this.layout.zIndex !== 'undefined') {
+      transform.z =
+        typeof this.layout.zIndex === 'string'
+          ? parseInt(this.layout.zIndex)
+          : this.layout.zIndex
+    }
+
+    if (typeof this.layout.rotate !== 'undefined') {
+      if (typeof this.layout.rotate === 'string') {
+        if (this.layout.rotate.endsWith('rad')) {
+          transform.rotation = parseFloat(this.layout.rotate) * (Math.PI / 180)
+        } else if (this.layout.rotate.endsWith('deg')) {
+          transform.rotation = parseFloat(this.layout.rotate)
+        } else if (this.layout.rotate.endsWith('turn')) {
+          transform.rotation = parseFloat(this.layout.rotate) * 360
+        } else {
+          transform.rotation = parseFloat(this.layout.rotate)
+        }
+      } else {
+        transform.rotation = this.layout.rotate
+      }
+    }
+
+    if (typeof this.layout.scale !== 'undefined') {
+      if (typeof this.layout.scale === 'string') {
+        const vector = new Vector(1, 1)
+
+        const [x, y] = this.layout.scale.split(' ')
+        if (x) {
+          if (x.endsWith('%')) {
+            vector.x = parseFloat(x) / 100
+          } else {
+            vector.x = parseFloat(x)
+          }
+        }
+        if (y) {
+          if (y.endsWith('%')) {
+            vector.y = parseFloat(y) / 100
+          } else {
+            vector.y = parseFloat(y)
+          }
+        }
+
+        transform.scale = vector
+      } else {
+        transform.scale = new Vector(this.layout.scale, this.layout.scale)
+      }
+    }
   }
 
-  onPostUpdate(engine: Engine): void {
+  reflow() {
     if (this.htmlElement) {
-      if (this._styleDirty) {
-        this.syncLayout()
-        this.children.forEach((child) => {
-          if (child instanceof BaseElement) {
-            child.syncLayout()
-          }
-        })
-        this._styleDirty = false
+      this.clientRect = this.getScaledBoundingClientRect()
+      this.localClientRect = this.getLocalScaledBoundingClientRect()
+      this.syncLayout()
+
+      for (const child of this.children) {
+        if (child instanceof BaseElement) {
+          child.reflow()
+        }
       }
+    }
+  }
+
+  getScaledBoundingClientRect() {
+    const clientRect = this.htmlElement.getBoundingClientRect()
+    const scale = this.htmlContainer.scale
+
+    return {
+      top: clientRect.top / scale.y,
+      left: clientRect.left / scale.x,
+      width: clientRect.width / scale.x,
+      height: clientRect.height / scale.y,
+    }
+  }
+
+  getLocalScaledBoundingClientRect() {
+    if (this.parent instanceof BaseElement) {
+      const parentClientRect = this.parent.clientRect
+
+      return {
+        top: this.clientRect.top - parentClientRect.top,
+        left: this.clientRect.left - parentClientRect.left,
+        width: this.clientRect.width,
+        height: this.clientRect.height,
+      }
+    } else {
+      return this.getScaledBoundingClientRect()
     }
   }
 
@@ -171,38 +244,17 @@ export class BaseElement extends Entity {
 
     return scene.__exui_html_container
   }
-
-  getBoundingClientRect() {
-    const rect = this.htmlElement.getBoundingClientRect()
-
-    const scale = this.htmlContainer.scale
-    return {
-      left: rect.x / scale.x,
-      top: rect.y / scale.y,
-      width: rect.width / scale.x,
-      height: rect.height / scale.y,
-    }
-  }
-
-  getLocalBoundingClientRect() {
-    if (this.parent instanceof BaseElement) {
-      const rect = this.getBoundingClientRect()
-      const parentRect = this.parent.getBoundingClientRect()
-
-      return {
-        left: rect.left - parentRect.left,
-        top: rect.top - parentRect.top,
-        width: rect.width,
-        height: rect.height,
-      }
-    }
-
-    return this.getBoundingClientRect()
-  }
 }
 
 export type BaseElementEvents = EntityEvents & {
   kill: KillEvent
   prekill: PreKillEvent
   postkill: PostKillEvent
+}
+
+interface Rect {
+  top: number
+  left: number
+  width: number
+  height: number
 }

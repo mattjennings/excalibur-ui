@@ -4,7 +4,6 @@ export * from './elements'
 export * from './hooks'
 export * from './animation'
 export { UI } from './ui'
-export * from './util'
 // Forward Solid control flow
 export {
   ErrorBoundary,

@@ -24,9 +24,6 @@ export interface GraphicProps<T extends GraphicElement = GraphicElement>
 export class GraphicElement extends ViewElement {
   private _graphics!: GraphicsComponent
 
-  private _width: number | undefined
-  private _height: number | undefined
-
   constructor() {
     super()
     this._graphics = new GraphicsComponent()
@@ -57,17 +54,8 @@ export class GraphicElement extends ViewElement {
 
     if (value) {
       this.graphics.add('default', value)
-
-      // if width/height has been set, apply it to the graphic
-      if (typeof this._width === 'number') {
-        value.width = this._width
-      }
-
-      if (typeof this._height === 'number') {
-        value.height = this._height
-      }
-
-      this.localBounds = new BoundingBox(0, 0, value.width, value.height)
+      this.width = value.width
+      this.height = value.height
     } else {
       this.localBounds = new BoundingBox(0, 0, 0, 0)
     }
@@ -82,20 +70,18 @@ export class GraphicElement extends ViewElement {
   }
 
   set width(value: number) {
-    this._width = value
-    super.width = value
-
     if (this.graphic) {
       this.graphic.width = value
     }
+    this.localBounds = new BoundingBox(0, 0, value, this.localBounds.height)
   }
 
   set height(value: number) {
-    this._height = value
-    super.height = value
     if (this.graphic) {
       this.graphic.height = value
     }
+
+    this.localBounds = new BoundingBox(0, 0, this.localBounds.width, value)
   }
 
   get opacity() {
@@ -118,13 +104,15 @@ export class GraphicElement extends ViewElement {
   syncLayout(): void {
     const style = this.htmlElement!.style
 
-    if (typeof this.layout.width === 'undefined') {
-      // let graphic determine width
-      style.width = this.width + 'px'
-    }
+    if (this.graphic) {
+      if (typeof this.layout.width === 'undefined') {
+        // let graphic determine width
+        style.width = this.graphic.width + 'px'
+      }
 
-    if (typeof this.layout.height === 'undefined') {
-      style.height = this.height + 'px'
+      if (typeof this.layout.height === 'undefined') {
+        style.height = this.graphic.height + 'px'
+      }
     }
 
     super.syncLayout()

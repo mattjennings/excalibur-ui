@@ -72,8 +72,9 @@ export class RectangleElement extends RasterElement {
   syncLayout(): void {
     super.syncLayout()
 
-    const rect = this.getLocalBoundingClientRect()
+    const rect = this.localClientRect
 
+    // if width/height were explicilty provided in style, then override it on graphic
     if (typeof this.layout.width !== 'undefined') {
       this.graphic.width = rect.width
     }

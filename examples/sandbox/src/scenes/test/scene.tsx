@@ -19,9 +19,11 @@ export default class Level1 extends ex.Scene {
             flexDirection: 'row',
             flexWrap: 'wrap',
             gap: '20px',
+            height: '100%',
             width: width() + 'px',
           }}
         >
+          {/* <ex-graphic graphic={images.sword.toSprite()} /> */}
           <ex-rectangle
             color="#ff000044"
             layout={{

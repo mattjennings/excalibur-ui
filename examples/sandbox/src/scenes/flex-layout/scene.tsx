@@ -7,7 +7,13 @@ export default class Level1 extends ex.Scene {
   time = 0
 
   onInitialize() {
-    const width = useValue(() => 400 + Math.sin(this.time) * 300)
+    const width = useValue(() => {
+      return 400 + Math.sin(this.time) * 300
+      // if (Math.sin(this.time) > 0.5) {
+      //   return 400
+      // }
+      // return 200
+    })
 
     this.add(
       new UI(() => (
@@ -18,6 +24,7 @@ export default class Level1 extends ex.Scene {
             flexDirection: 'row',
             flexWrap: 'wrap',
             gap: '20px',
+            height: '100%',
             width: width() + 'px',
           }}
         >
