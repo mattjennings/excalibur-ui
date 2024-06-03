@@ -2,7 +2,6 @@ import { createExElement } from '.'
 
 import {
   BoundingBox,
-  Entity,
   EntityEvents,
   EventEmitter,
   KillEvent,
@@ -18,10 +17,8 @@ import {
   PreKillEvent,
   PreTransformDrawEvent,
   PreUpdateEvent,
-  TransformComponent,
   Vector,
 } from 'excalibur'
-import { createStore } from 'solid-js/store'
 import { JSXElement } from 'solid-js'
 import { BaseElement, BaseElementProps } from '../base-element'
 

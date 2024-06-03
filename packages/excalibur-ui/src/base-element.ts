@@ -12,10 +12,52 @@ import {
   Vector,
 } from 'excalibur'
 import { HTMLContainer } from './html-container'
+import * as csstype from 'csstype'
+
+export type LayoutProperties = Pick<
+  csstype.Properties,
+  | 'alignItems'
+  | 'alignSelf'
+  | 'display'
+  | 'flexBasis'
+  | 'flexDirection'
+  | 'flexGrow'
+  | 'flexShrink'
+  | 'flexWrap'
+  | 'gap'
+  | 'grid'
+  | 'gridArea'
+  | 'gridAutoColumns'
+  | 'gridAutoFlow'
+  | 'gridAutoRows'
+  | 'gridColumn'
+  | 'gridColumnGap'
+  | 'gridGap'
+  | 'gridRow'
+  | 'gridRowGap'
+  | 'gridTemplate'
+  | 'gridTemplateAreas'
+  | 'gridTemplateColumns'
+  | 'gridTemplateRows'
+  | 'height'
+  | 'justifyContent'
+  | 'justifyItems'
+  | 'justifySelf'
+  | 'left'
+  | 'margin'
+  | 'order'
+  | 'padding'
+  | 'placeContent'
+  | 'placeItems'
+  | 'placeSelf'
+  | 'position'
+  | 'top'
+  | 'width'
+  | 'zIndex'
+>
 
 export interface BaseElementProps {
-  class?: string
-  style?: JSX.IntrinsicElements['div']['style']
+  layout?: LayoutProperties
 }
 
 /**
@@ -29,12 +71,13 @@ export class BaseElement extends Entity {
 
   protected _styleDirty = true
   protected _styleMutationObserver: MutationObserver | null = null
+  protected _layout!: LayoutProperties
 
   constructor() {
     super()
     this.htmlElement = document.createElement('div')
-    this.htmlElement.style.visibility = 'hidden'
-    this.style = {}
+
+    this.layout = {}
     this._transform = new TransformComponent()
     this.addComponent(this._transform)
     this._styleMutationObserver = new MutationObserver(() => {
@@ -51,12 +94,13 @@ export class BaseElement extends Entity {
     return this._transform
   }
 
-  get style(): CSSStyleDeclaration {
-    return this.htmlElement.style
+  get layout(): LayoutProperties {
+    return this._layout
   }
 
-  set style(value: JSX.IntrinsicElements['div']['style']) {
-    Object.assign(this.htmlElement.style, value)
+  set layout(value: BaseElementProps['layout']) {
+    this._layout = value || {}
+    Object.assign(this.htmlElement.style, this._layout)
   }
 
   onInitialize(engine: Engine) {
@@ -93,12 +137,8 @@ export class BaseElement extends Entity {
   onPreKill() {}
   onPostKill() {}
 
-  applyNativeStyle(
-    // @ts-ignore
-    styles: CSSStyleDeclaration,
-  ) {
+  syncLayout() {
     const rect = this.getLocalBoundingClientRect()
-
     const transform = this.transform
 
     transform.pos = new Vector(rect.left, rect.top)
@@ -108,10 +148,10 @@ export class BaseElement extends Entity {
   onPostUpdate(engine: Engine): void {
     if (this.htmlElement) {
       if (this._styleDirty) {
-        this.applyNativeStyle(this.htmlElement.style)
+        this.syncLayout()
         this.children.forEach((child) => {
           if (child instanceof BaseElement) {
-            child.applyNativeStyle(child.htmlElement.style)
+            child.syncLayout()
           }
         })
         this._styleDirty = false

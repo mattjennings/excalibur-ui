@@ -115,22 +115,18 @@ export class GraphicElement extends ViewElement {
     return this.graphics.material
   }
 
-  applyNativeStyle(styles: CSSStyleDeclaration): void {
-    super.applyNativeStyle(styles)
-    const rect = this.getLocalBoundingClientRect()
+  syncLayout(): void {
+    const style = this.htmlElement!.style
 
-    if (this.graphic) {
-      if ('width' in this.graphic) {
-        this.graphic.width = rect.width
-      }
-
-      if ('height' in this.graphic) {
-        this.graphic.height = rect.height
-      }
-
-      if (styles.color && 'color' in this.graphic) {
-        this.graphic.color = Color.fromRGBString(styles.color)
-      }
+    if (typeof this.layout.width === 'undefined') {
+      // let graphic determine width
+      style.width = this.width + 'px'
     }
+
+    if (typeof this.layout.height === 'undefined') {
+      style.height = this.height + 'px'
+    }
+
+    super.syncLayout()
   }
 }

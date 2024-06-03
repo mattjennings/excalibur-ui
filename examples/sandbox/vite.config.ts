@@ -25,7 +25,7 @@ export default defineConfig({
     }),
     solidPlugin({
       solid: {
-        moduleName: 'excalibur-ui/runtime',
+        moduleName: 'excalibur-ui/jsx-runtime',
         generate: 'universal',
       },
     }),

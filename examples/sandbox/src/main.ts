@@ -1,5 +1,6 @@
 import './style.css'
 import { createMenu } from './menu'
+import resources from './resources'
 
 // load all scenes from ./scenes directory where folder name is the scene name
 // and the scene file is named `scene.tsx`
@@ -49,7 +50,10 @@ const game = new ex.Engine<string>({
   scenes,
 })
 
+const loader = new ex.Loader(resources)
+loader.suppressPlayButton = true
 game.start(initialScene, {
+  loader,
   inTransition: new ex.FadeInOut({
     duration: 200,
     direction: 'in',

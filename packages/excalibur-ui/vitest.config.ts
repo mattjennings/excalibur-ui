@@ -19,14 +19,14 @@ export default defineConfig({
     alias: {
       '$test-utils': '/test-utils',
       $fixture: '/test-utils/fixture.ts',
-      'excalibur-ui/runtime': '/src/runtime.tsx',
+      'excalibur-ui/jsx-runtime': '/src/jsx-runtime.tsx',
       'excalibur-ui': '/src/index.tsx',
     },
   },
   plugins: [
     solidPlugin({
       solid: {
-        moduleName: 'excalibur-ui/runtime',
+        moduleName: 'excalibur-ui/jsx-runtime',
         generate: 'universal',
       },
     }),

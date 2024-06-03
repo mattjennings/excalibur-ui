@@ -87,8 +87,4 @@ export class HTMLContainer extends Entity {
       this.htmlElement.style.setProperty('--px', `1px`)
     }
   }
-
-  toCssPx(value: number) {
-    return `calc(${value} * var(--px))`
-  }
 }

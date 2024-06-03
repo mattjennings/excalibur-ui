@@ -1,40 +1,38 @@
 import { UI, useValue } from 'excalibur-ui'
 import { Engine } from 'excalibur'
+import { For, createEffect } from 'solid-js'
+import { images } from '../../resources'
 
 export default class Level1 extends ex.Scene {
   time = 0
   pos = ex.vec(0, 0)
 
   onInitialize() {
-    this.add(new Player())
+    const width = useValue(() => 400 + Math.sin(this.time) * 300)
 
     this.add(
       new UI(() => (
         <ex-view
-          style={{
+          layout={{
             position: 'absolute',
             display: 'flex',
-            'flex-direction': 'column',
-            gap: '10px',
-            width: '500px',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: '20px',
+            width: width() + 'px',
           }}
         >
           <ex-rectangle
-            color="#ff4400"
-            style={{
-              width: '100px',
-              height: '100px',
-              color: '#ff0000',
+            color="#ff000044"
+            layout={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
             }}
           />
-          <ex-rectangle
-            color="#ff4400"
-            style={{
-              width: '100px',
-              height: '100px',
-              color: '#ff0000',
-            }}
-          />
+          <For each={Array.from({ length: 35 })}>
+            {() => <ex-graphic graphic={images.sword.toSprite()} />}
+          </For>
         </ex-view>
       )),
     )
@@ -74,7 +72,7 @@ class Player extends ex.Actor {
       new UI(() => {
         return (
           <>
-            <button>sadf</button>
+            {/* <button>sadf</button> */}
 
             {/* <ex-rectangle
               color="#ff4400"

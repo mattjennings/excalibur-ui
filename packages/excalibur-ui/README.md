@@ -22,7 +22,7 @@ Update your `.babelrc` file:
     [
       "babel-preset-solid",
       {
-        "moduleName": "excalibur-ui/runtime",
+        "moduleName": "excalibur-ui/jsx-runtime",
         "generate": "universal"
       }
     ]
@@ -46,12 +46,25 @@ export default defineConfig({
   plugins: [
     solidPlugin({
       solid: {
-        moduleName: 'excalibur-ui/runtime',
+        moduleName: 'excalibur-ui/jsx-runtime',
         generate: 'universal',
       },
     }),
   ],
 })
+```
+
+## Typescript
+
+If you're using typescript, be sure to add the following to your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js"
+  }
+}
 ```
 
 ## Usage

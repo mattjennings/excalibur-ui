@@ -1,14 +1,15 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
+import dts from 'vite-plugin-dts'
 
 export default defineConfig({
   build: {
     sourcemap: true,
-    emptyOutDir: false,
+    emptyOutDir: true,
     lib: {
       entry: [
         resolve(__dirname, 'src/index.tsx'),
-        resolve(__dirname, 'src/runtime.tsx'),
+        resolve(__dirname, 'src/jsx-runtime.tsx'),
       ],
       formats: ['es', 'cjs'],
     },
@@ -22,4 +23,5 @@ export default defineConfig({
     },
     minify: false,
   },
+  plugins: [dts()],
 })

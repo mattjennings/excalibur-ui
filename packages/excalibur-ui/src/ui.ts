@@ -1,13 +1,11 @@
 import {
   Engine,
-  Entity,
   GraphicsComponent,
-  Scene,
   TransformComponent,
   Vector,
 } from 'excalibur'
 import { JSXElement } from 'solid-js'
-import { render } from './runtime'
+import { render } from './jsx-runtime'
 import { ViewElement } from './elements'
 import { BaseElement } from './base-element'
 
@@ -23,9 +21,8 @@ export class UI extends BaseElement {
 
   onInitialize(engine: Engine): void {
     super.onInitialize(engine)
-    this.style = {
+    this.layout = {
       position: 'absolute',
-      visibility: 'visible',
       width: '100%',
       height: '100%',
     }
@@ -40,7 +37,7 @@ export class UI extends BaseElement {
     return super.children as ViewElement[]
   }
 
-  applyNativeStyle(styles: CSSStyleDeclaration): void {
+  syncLayout(): void {
     if (this.parent && this.scene) {
       const transform = this.parent.get(TransformComponent)
       const graphics = this.parent.get(GraphicsComponent)
@@ -53,10 +50,10 @@ export class UI extends BaseElement {
         const width = graphics.current?.width || 0
         const height = graphics.current?.height || 0
 
-        this.style.left = `${screenPos.x - anchor.x * width}px`
-        this.style.top = `${screenPos.y - anchor.y * height}px`
-        this.style.width = `${width}px`
-        this.style.height = `${height}px`
+        this.layout.left = `${screenPos.x - anchor.x * width}px`
+        this.layout.top = `${screenPos.y - anchor.y * height}px`
+        this.layout.width = `${width}px`
+        this.layout.height = `${height}px`
       }
     }
   }

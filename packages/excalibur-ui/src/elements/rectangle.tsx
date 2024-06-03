@@ -1,6 +1,6 @@
 import { createExElement } from '.'
 
-import { Color, Rectangle } from 'excalibur'
+import { Rectangle } from 'excalibur'
 import { RasterElement, RasterProps } from './raster'
 
 export default createExElement({
@@ -66,6 +66,20 @@ export class RectangleElement extends RasterElement {
           bottomRight: value.bottomRight ?? 0,
         }
       }
+    }
+  }
+
+  syncLayout(): void {
+    super.syncLayout()
+
+    const rect = this.getLocalBoundingClientRect()
+
+    if (typeof this.layout.width !== 'undefined') {
+      this.graphic.width = rect.width
+    }
+
+    if (typeof this.layout.height !== 'undefined') {
+      this.graphic.height = rect.height
     }
   }
 }

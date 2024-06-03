@@ -11,9 +11,9 @@ import {
 } from './elements'
 import { UI } from './ui'
 
-declare global {
+declare module 'solid-js' {
   namespace JSX {
-    interface IntrinsicElements extends JSXSolid.IntrinsicElements {
+    interface IntrinsicElements {
       'ex-text': TextProps
       'ex-rectangle': RectangleProps
       'ex-view': ViewProps
