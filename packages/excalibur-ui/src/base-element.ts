@@ -43,9 +43,21 @@ export interface LayoutProperties
     | 'justifyItems'
     | 'justifySelf'
     | 'left'
+    | 'right'
+    | 'bottom'
     | 'margin'
+    | 'marginBottom'
+    | 'marginLeft'
+    | 'marginRight'
+    | 'marginTop'
+    | 'maxHeight'
+    | 'maxWidth'
     | 'order'
     | 'padding'
+    | 'paddingBottom'
+    | 'paddingLeft'
+    | 'paddingRight'
+    | 'paddingTop'
     | 'placeContent'
     | 'placeItems'
     | 'placeSelf'
@@ -108,11 +120,13 @@ export class BaseElement extends Entity {
 
   onInitialize(engine: Engine) {
     this.htmlContainer = this.getHTMLContainer(engine.currentScene)
+
     if (this.parent instanceof BaseElement) {
       this.parent.htmlElement.appendChild(this.htmlElement)
     } else {
       this.htmlContainer.htmlElement.appendChild(this.htmlElement)
     }
+    this.syncLayout()
   }
 
   kill() {
@@ -136,6 +150,9 @@ export class BaseElement extends Entity {
   onPostKill() {}
 
   syncLayout() {
+    this.clientRect = this.getScaledBoundingClientRect()
+    this.localClientRect = this.getLocalScaledBoundingClientRect()
+
     const rect = this.localClientRect
     const transform = this.transform
 
@@ -192,9 +209,7 @@ export class BaseElement extends Entity {
   }
 
   reflow() {
-    if (this.htmlElement) {
-      this.clientRect = this.getScaledBoundingClientRect()
-      this.localClientRect = this.getLocalScaledBoundingClientRect()
+    if (this.htmlElement && this.htmlContainer) {
       this.syncLayout()
 
       for (const child of this.children) {

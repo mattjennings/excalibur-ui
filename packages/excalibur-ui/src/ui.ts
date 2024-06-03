@@ -40,6 +40,7 @@ export class UI extends BaseElement {
       height: '100%',
     }
     render(this.ui as any, this)
+    this.syncLayout()
 
     this.scene!.on('predraw', () => {
       if (this._needsReflow) {
@@ -54,6 +55,9 @@ export class UI extends BaseElement {
   }
 
   syncLayout(): void {
+    this.clientRect = this.getScaledBoundingClientRect()
+    this.localClientRect = this.clientRect
+
     if (this.parent && this.scene) {
       const transform = this.parent.get(TransformComponent)
       const graphics = this.parent.get(GraphicsComponent)

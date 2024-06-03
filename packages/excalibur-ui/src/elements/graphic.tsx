@@ -22,7 +22,7 @@ export interface GraphicProps<T extends GraphicElement = GraphicElement>
 }
 
 export class GraphicElement extends ViewElement {
-  private _graphics!: GraphicsComponent
+  protected _graphics!: GraphicsComponent
 
   constructor() {
     super()
@@ -54,8 +54,7 @@ export class GraphicElement extends ViewElement {
 
     if (value) {
       this.graphics.add('default', value)
-      this.width = value.width
-      this.height = value.height
+      this.localBounds = new BoundingBox(0, 0, value.width, value.height)
     } else {
       this.localBounds = new BoundingBox(0, 0, 0, 0)
     }
@@ -67,21 +66,6 @@ export class GraphicElement extends ViewElement {
 
   get width() {
     return super.width
-  }
-
-  set width(value: number) {
-    if (this.graphic) {
-      this.graphic.width = value
-    }
-    this.localBounds = new BoundingBox(0, 0, value, this.localBounds.height)
-  }
-
-  set height(value: number) {
-    if (this.graphic) {
-      this.graphic.height = value
-    }
-
-    this.localBounds = new BoundingBox(0, 0, this.localBounds.width, value)
   }
 
   get opacity() {

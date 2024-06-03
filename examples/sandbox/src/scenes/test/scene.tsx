@@ -8,7 +8,7 @@ export default class Level1 extends ex.Scene {
   pos = ex.vec(0, 0)
 
   onInitialize() {
-    const width = useValue(() => 400 + Math.sin(this.time) * 300)
+    const width = useValue(() => 600 + Math.sin(this.time) * 200)
 
     this.add(
       new UI(() => (
@@ -16,14 +16,12 @@ export default class Level1 extends ex.Scene {
           layout={{
             position: 'absolute',
             display: 'flex',
-            flexDirection: 'row',
             flexWrap: 'wrap',
             gap: '20px',
-            height: '100%',
+            // width: '800px',
             width: width() + 'px',
           }}
         >
-          {/* <ex-graphic graphic={images.sword.toSprite()} /> */}
           <ex-rectangle
             color="#ff000044"
             layout={{
@@ -32,8 +30,21 @@ export default class Level1 extends ex.Scene {
               height: '100%',
             }}
           />
-          <For each={Array.from({ length: 35 })}>
-            {() => <ex-graphic graphic={images.sword.toSprite()} />}
+          <For each={Array.from({ length: 50 })}>
+            {(_, index) => (
+              <ex-graphic graphic={images.sword.toSprite()}>
+                <button
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => alert('clicked ' + index())}
+                />
+              </ex-graphic>
+            )}
           </For>
         </ex-view>
       )),
